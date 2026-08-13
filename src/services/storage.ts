@@ -1,3 +1,5 @@
+import { get, set, del, entries } from 'idb-keyval';
+
 export async function compressImage(file: File): Promise<Blob> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -42,4 +44,16 @@ export async function compressImage(file: File): Promise<Blob> {
     reader.onerror = () => reject(new Error('File reading failed'));
     reader.readAsDataURL(file);
   });
+}
+
+export async function savePhoto(id: string, blob: Blob): Promise<void> {
+  await set(`photo-${id}`, blob);
+}
+
+export async function getPhoto(id: string): Promise<Blob | undefined> {
+  return await get(`photo-${id}`);
+}
+
+export async function deletePhoto(id: string): Promise<void> {
+  await del(`photo-${id}`);
 }
