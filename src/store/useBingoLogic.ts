@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useBingoStore } from './useBingoStore';
-import { checkBingo } from '../core/engine';
+import { checkBingo, getBingoLines } from '../core/engine';
 
 export const useBingoLogic = () => {
   const { cards, currentCardId, completeCell } = useBingoStore();
@@ -10,14 +10,23 @@ export const useBingoLogic = () => {
     [cards, currentCardId]
   );
 
-  const isBingo = useMemo(() => {
-    if (!currentCard) return false;
-    const completedPositions = currentCard.cells
+  const completedPositions = useMemo(() => {
+    if (!currentCard) return [];
+    return currentCard.cells
       .filter((cell) => cell.isCompleted)
       .map((cell) => cell.position)
       .filter((pos): pos is number => pos !== undefined);
-    return checkBingo(completedPositions, currentCard.size);
   }, [currentCard]);
+
+  const isBingo = useMemo(() => {
+    if (!currentCard) return false;
+    return checkBingo(completedPositions, currentCard.size);
+  }, [currentCard, completedPositions]);
+
+  const completedLineCount = useMemo(() => {
+    if (!currentCard) return 0;
+    return getBingoLines(completedPositions, currentCard.size);
+  }, [currentCard, completedPositions]);
 
   const toggleCell = (cellId: string) => {
     if (currentCardId) {
@@ -28,6 +37,7 @@ export const useBingoLogic = () => {
   return {
     currentCard,
     isBingo,
+    completedLineCount,
     toggleCell,
   };
 };

@@ -52,3 +52,57 @@ export const checkBingo = (completedPositions: number[], size: number): boolean 
 
   return false;
 };
+
+/**
+ * Returns the number of completed lines (rows, columns, diagonals)
+ */
+export const getBingoLines = (completedPositions: number[], size: number): number => {
+  const completedSet = new Set(completedPositions);
+  let lines = 0;
+
+  // Rows
+  for (let r = 0; r < size; r++) {
+    let complete = true;
+    for (let c = 0; c < size; c++) {
+      if (!completedSet.has(r * size + c)) {
+        complete = false;
+        break;
+      }
+    }
+    if (complete) lines++;
+  }
+
+  // Columns
+  for (let c = 0; c < size; c++) {
+    let complete = true;
+    for (let r = 0; r < size; r++) {
+      if (!completedSet.has(r * size + c)) {
+        complete = false;
+        break;
+      }
+    }
+    if (complete) lines++;
+  }
+
+  // Main Diagonal
+  let mainDiagComplete = true;
+  for (let i = 0; i < size; i++) {
+    if (!completedSet.has(i * size + i)) {
+      mainDiagComplete = false;
+      break;
+    }
+  }
+  if (mainDiagComplete) lines++;
+
+  // Anti-Diagonal
+  let antiDiagComplete = true;
+  for (let i = 0; i < size; i++) {
+    if (!completedSet.has(i * size + (size - 1 - i))) {
+      antiDiagComplete = false;
+      break;
+    }
+  }
+  if (antiDiagComplete) lines++;
+
+  return lines;
+};

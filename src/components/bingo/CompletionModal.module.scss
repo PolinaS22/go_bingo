@@ -1,0 +1,93 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+}
+
+.modal {
+  background: #fff;
+  border-radius: 20px;
+  padding: 32px;
+  max-width: 480px;
+  width: 100%;
+  position: relative;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  color: #1a1a1a;
+
+  h2 { margin: 0 0 16px; font-size: 1.5rem; }
+}
+
+.closeButton {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #666;
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.description { color: #555; line-height: 1.5; }
+
+.rewardSection {
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    border-radius: 12px;
+    padding: 16px;
+
+    h4 { margin: 0 0 8px; color: #0369a1; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; }
+    .rewardTitle { font-weight: bold; margin: 0; }
+    .rewardDesc { margin: 4px 0 0; font-size: 0.9rem; color: #666; }
+}
+
+.actionArea, .previewArea {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.uploadBox {
+    border: 2px dashed #e5e7eb;
+    border-radius: 12px;
+    padding: 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s;
+
+    &:hover { border-color: #3b82f6; }
+    label { cursor: pointer; display: block; width: 100%; }
+}
+
+.completeBtn, .closeBtn {
+    background: #3b82f6;
+    color: #fff;
+    border: none;
+    padding: 14px;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+
+    &:hover { opacity: 0.9; }
+    &:disabled { background: #d1d5db; cursor: not-allowed; }
+}
+
+.photo {
+    width: 100%;
+    border-radius: 12px;
+    max-height: 320px;
+    object-fit: cover;
+}
