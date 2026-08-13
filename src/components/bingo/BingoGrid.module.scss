@@ -31,3 +31,37 @@
     gap: 0.5rem !important;
   }
 }
+
+.celebration {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 100;
+}
+
+.bingoText {
+  font-size: 8rem;
+  font-weight: 900;
+  color: var(--primary-color);
+  text-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+  transform: rotate(-5deg);
+}
+
+.particles {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.particle {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  background-color: var(--secondary-color);
+  border-radius: 50%;
+}

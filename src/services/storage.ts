@@ -97,3 +97,30 @@ export async function downloadBackup(): Promise<void> {
   a.click();
   URL.revokeObjectURL(url);
 }
+
+export async function uploadBackup(file: File, onImport: (data: any) => void): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      try {
+        const backup = JSON.parse(e.target?.result as string);
+        
+        // Import photos into IndexedDB
+        if (backup.photos) {
+          for (const [key, base64] of Object.entries(backup.photos)) {
+            const res = await fetch(base64 as string);
+            const blob = await res.blob();
+            await set(key, blob);
+          }
+        }
+
+        onImport(backup);
+        resolve();
+      } catch (err) {
+        reject(err);
+      }
+    };
+    reader.onerror = () => reject(new Error('File reading failed'));
+    reader.readAsText(file);
+  });
+}

@@ -1,46 +1,19 @@
-import { useEffect } from 'react';
+import { useState } from 'react';
 import { useBingoStore } from './store/useBingoStore';
 import { useBingoLogic } from './store/useBingoLogic';
 import { BingoGrid } from './components/bingo/BingoGrid';
 import { ThemeWrapper } from './components/bingo/ThemeWrapper';
-import { BingoCard } from './types/bingo';
+import MemoriesView from './views/MemoriesView';
+import { Camera } from 'lucide-react';
 
 function App() {
+  const [view, setView] = useState<'play' | 'memories'>('play');
   const { currentCard, toggleCell } = useBingoLogic();
   const { addCard, setCurrentCard } = useBingoStore();
 
-  useEffect(() => {
-    if (!currentCard) {
-      const demoCard: BingoCard = {
-        id: 'demo-card',
-        title: 'Daily Habits Bingo',
-        size: 3,
-        difficulty: 'easy',
-        theme: {
-          id: 'modern-blue',
-          name: 'Modern Blue',
-          primaryColor: '#3b82f6',
-          secondaryColor: '#10b981',
-          backgroundColor: '#f8fafc',
-          textColor: '#1e293b',
-        },
-        cells: [
-          { id: '1', text: 'Drink Water', isCompleted: false, position: 0 },
-          { id: '2', text: 'Exercise', isCompleted: false, position: 1 },
-          { id: '3', text: 'Read', isCompleted: false, position: 2 },
-          { id: '4', text: 'Meditate', isCompleted: false, position: 3 },
-          { id: '5', text: 'Walk', isCompleted: false, position: 4 },
-          { id: '6', text: 'Code', isCompleted: false, position: 5 },
-          { id: '7', text: 'Sleep 8h', isCompleted: false, position: 6 },
-          { id: '8', text: 'Eat Healthy', isCompleted: false, position: 7 },
-          { id: '9', text: 'Journal', isCompleted: false, position: 8 },
-        ],
-        createdAt: Date.now(),
-      };
-      addCard(demoCard);
-      setCurrentCard(demoCard.id);
-    }
-  }, [currentCard, addCard, setCurrentCard]);
+  if (view === 'memories') {
+    return <MemoriesView onBack={() => setView('play')} />;
+  }
 
   if (!currentCard) return <div>Loading...</div>;
 
@@ -50,10 +23,33 @@ function App() {
         minHeight: '100vh', 
         backgroundColor: 'var(--background-color)',
         display: 'flex',
+        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '2rem'
+        padding: '2rem',
+        position: 'relative'
       }}>
+        <button 
+          onClick={() => setView('memories')}
+          style={{
+            position: 'absolute',
+            top: '2rem',
+            right: '2rem',
+            background: 'white',
+            border: 'none',
+            borderRadius: '50%',
+            width: '48px',
+            height: '48px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+            cursor: 'pointer',
+            zIndex: 10
+          }}
+        >
+          <Camera size={24} />
+        </button>
         <BingoGrid card={currentCard} onCellClick={toggleCell} />
       </div>
     </ThemeWrapper>

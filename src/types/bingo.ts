@@ -5,6 +5,7 @@ export interface BingoCell {
   text: string;
   isCompleted: boolean;
   position: number;
+  photoId?: string;
 }
 
 export interface BingoTheme {

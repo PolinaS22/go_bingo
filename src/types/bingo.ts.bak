@@ -22,6 +22,7 @@ export interface BingoCard {
   cells: BingoCell[];
   difficulty: Difficulty;
   theme: BingoTheme;
+  size: number;
   createdAt: number;
   completedAt?: number;
 }
