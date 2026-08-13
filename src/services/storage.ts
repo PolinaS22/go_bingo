@@ -57,3 +57,43 @@ export async function getPhoto(id: string): Promise<Blob | undefined> {
 export async function deletePhoto(id: string): Promise<void> {
   await del(`photo-${id}`);
 }
+
+async function blobToBase64(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+export async function downloadBackup(): Promise<void> {
+  const lsData: Record<string, string> = {};
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key) lsData[key] = localStorage.getItem(key) || '';
+  }
+
+  const idbEntries = await entries();
+  const photos: Record<string, string> = {};
+
+  for (const [key, value] of idbEntries) {
+    if (key.toString().startsWith('photo-') && value instanceof Blob) {
+      photos[key.toString()] = await blobToBase64(value);
+    }
+  }
+
+  const backup = {
+    localStorage: lsData,
+    photos,
+    timestamp: new Date().toISOString(),
+  };
+
+  const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `bingo-backup-${new Date().toISOString().split('T')[0]}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
