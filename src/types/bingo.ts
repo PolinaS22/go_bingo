@@ -17,6 +17,7 @@ export interface Reward {
 export interface BingoCell {
   id: string;
   title: string;
+  text?: string; // For backward compatibility
   description?: string;
   icon?: string;
   difficulty: Difficulty;
@@ -24,11 +25,14 @@ export interface BingoCell {
   customImage?: string;
   reward?: Reward;
   completedAt?: string;
+  isCompleted?: boolean; // For backward compatibility
   photoId?: string;
   photoRequired?: boolean;
+  position?: number; // Added for logic
 }
 
 export interface BingoTheme {
+  id: string; // Added ID
   primaryColor: string;
   secondaryColor: string;
   backgroundColor: string;
@@ -48,4 +52,5 @@ export interface BingoCard {
   isFrozen: boolean;
   createdAt: number;
   updatedAt: number;
+  completedAt?: number; // Added completedAt
 }

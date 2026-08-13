@@ -20,7 +20,7 @@ const MemoriesView: React.FC<{ onBack: () => void }> = ({ onBack }) => {
               allPhotos.push({
                 id: cell.photoId,
                 url: URL.createObjectURL(blob),
-                text: cell.text
+                text: cell.text || cell.title || ''
               });
             }
           }

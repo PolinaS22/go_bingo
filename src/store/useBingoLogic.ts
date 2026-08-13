@@ -14,7 +14,8 @@ export const useBingoLogic = () => {
     if (!currentCard) return false;
     const completedPositions = currentCard.cells
       .filter((cell) => cell.isCompleted)
-      .map((cell) => cell.position);
+      .map((cell) => cell.position)
+      .filter((pos): pos is number => pos !== undefined);
     return checkBingo(completedPositions, currentCard.size);
   }, [currentCard]);
 

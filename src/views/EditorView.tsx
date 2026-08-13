@@ -13,6 +13,7 @@ export const EditorView: React.FC<{ onSave: () => void }> = ({ onSave }) => {
   const [selectedCellId, setSelectedCellId] = useState<string | null>(null);
 
   const defaultTheme: BingoTheme = {
+    id: 'default',
     primaryColor: '#3b82f6',
     secondaryColor: '#1d4ed8',
     backgroundColor: '#ffffff',
@@ -29,9 +30,11 @@ export const EditorView: React.FC<{ onSave: () => void }> = ({ onSave }) => {
       const updatedCells = [...prevCells].slice(0, newCellsCount);
 
       for (let i = updatedCells.length; i < newCellsCount; i++) {
+        const title = `Cell ${i + 1}`;
         updatedCells.push({
           id: crypto.randomUUID(),
-          title: `Cell ${i + 1}`,
+          title,
+          text: title,
           difficulty: 'NORMAL',
           photoRequired: false,
         });
@@ -45,7 +48,8 @@ export const EditorView: React.FC<{ onSave: () => void }> = ({ onSave }) => {
   };
 
   const handleCellChange = (updatedCell: BingoCell) => {
-    setCells(cells.map(c => c.id === updatedCell.id ? updatedCell : c));
+    const finalCell = { ...updatedCell, text: updatedCell.title };
+    setCells(cells.map(c => c.id === finalCell.id ? finalCell : c));
   };
 
   const handleCreate = () => {
