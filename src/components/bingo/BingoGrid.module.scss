@@ -3,13 +3,18 @@
 .wrap {
   position: relative;
   width: 100%;
+  padding: 20px;
+  background: $glass-bg;
+  backdrop-filter: blur(20px);
+  border-radius: 40px;
+  box-shadow: $card-shadow;
+  border: 1px solid rgba(255, 255, 255, 0.4);
 }
 
 .grid {
   display: grid;
   width: 100%;
-  border-top: 1px solid $ink;
-  border-left: 1px solid $ink;
+  gap: 12px;
   user-select: none;
 }
 
@@ -17,7 +22,7 @@
   position: absolute;
   z-index: 3;
   pointer-events: none;
-  background: $stamp-blue;
+  background: $bubblegum-pink;
   color: #fff;
   font-weight: 900;
   font-size: clamp(0.85rem, 3.2vw, 1.6rem);
@@ -25,5 +30,7 @@
   text-transform: uppercase;
   text-align: center;
   padding: 0.28rem 0.6rem;
-  box-shadow: 2px 3px 0 rgba(61, 41, 20, 0.18);
+  box-shadow: 2px 3px 0 rgba(61, 41, 20, 0.1);
+  border-radius: 12px;
+  transform: rotate(-3deg);
 }

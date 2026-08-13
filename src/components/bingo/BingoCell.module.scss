@@ -5,24 +5,48 @@
   aspect-ratio: 1 / 1;
   width: 100%;
   min-width: 0;
-  padding: 0.35rem 0.3rem 0.45rem;
-  border: none;
-  border-right: 1px solid $ink;
-  border-bottom: 1px solid $ink;
-  background-color: transparent;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: $radius;
+  background-color: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(8px);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
   overflow: hidden;
-  color: $ink;
+  color: $deep-mocha;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+  &:hover {
+    transform: translateY(-4px) scale(1.02);
+    background-color: rgba(255, 255, 255, 0.6);
+    box-shadow: 0 10px 20px rgba(255, 182, 193, 0.15);
+  }
 
   &:focus-visible {
-    outline: 2px solid $ink;
-    outline-offset: -2px;
+    outline: 2px solid $bubblegum-pink;
+    outline-offset: 2px;
   }
 }
+
+.watercolorSpot {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  opacity: 0.15;
+  pointer-events: none;
+  filter: blur(20px);
+}
+
+// Watercolor variations
+.spot0 { background: radial-gradient(circle, $cottage-rose 0%, transparent 70%); }
+.spot1 { background: radial-gradient(circle, $vintage-sage 0%, transparent 70%); }
+.spot2 { background: radial-gradient(circle, $stamp-blue 0%, transparent 70%); }
+.spot3 { background: radial-gradient(circle, $gold 0%, transparent 70%); }
+.spot4 { background: radial-gradient(circle, $bubblegum-pink 0%, transparent 70%); }
+.spot5 { background: radial-gradient(circle, #E6E6FA 0%, transparent 70%); }
 
 .hasCustomBackground {
   background-size: cover;
@@ -36,6 +60,7 @@
   height: 100%;
   object-fit: cover;
   z-index: 0;
+  filter: brightness(0.9);
 }
 
 .content {
@@ -44,90 +69,76 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  gap: 0.2rem;
+  justify-content: center;
+  gap: 8px;
   height: 100%;
   width: 100%;
-  min-height: 0;
-}
-
-.textOnly {
-  justify-content: center;
 }
 
 .icon {
-  font-size: 1.25rem;
+  font-size: 1.5rem;
   line-height: 1;
-}
-
-.iconImage {
-  width: clamp(18px, 4.5vw, 36px);
-  height: clamp(18px, 4.5vw, 36px);
-  object-fit: contain;
-  margin-top: auto;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
 }
 
 .title {
   font-weight: 700;
-  font-size: clamp(0.45rem, 1.6vw, 0.72rem);
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
-  line-height: 1.15;
+  font-size: clamp(0.6rem, 2vw, 0.9rem);
+  line-height: 1.2;
   word-break: break-word;
-  color: $ink;
+  color: $deep-mocha;
+  font-family: 'Quicksand', sans-serif;
 }
 
 .difficultyGolden {
-  background-color: rgba(232, 184, 109, 0.28);
+  border: 2px solid $gold;
+  box-shadow: 0 0 15px rgba(232, 184, 109, 0.3);
+  
+  &::after {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    border-radius: $radius;
+    padding: 2px;
+    background: linear-gradient(45deg, transparent, $gold, transparent);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0.5;
+  }
 }
 
 .selected {
-  box-shadow: inset 0 0 0 2px $ink;
+  border: 2px solid $bubblegum-pink;
+  background-color: rgba(255, 192, 203, 0.1);
 }
 
 .completed {
   .title {
     color: #fff;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
   }
-}
-
-.doneBanner {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.25rem;
-  background: rgba(196, 92, 88, 0.92);
-  color: #fff;
-  font-size: clamp(0.45rem, 1.5vw, 0.7rem);
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  padding: 0.2rem 0.25rem;
+  
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.2);
+    z-index: 0;
+  }
 }
 
 .doneStar {
   position: absolute;
-  top: 3px;
-  right: 3px;
+  top: 8px;
+  right: 8px;
   z-index: 2;
   color: $gold;
-  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.2));
-  line-height: 0;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
 }
 
 @media (max-width: 768px) {
   .cell {
-    padding: 0.22rem 0.15rem 0.3rem;
-  }
-
-  .iconImage {
-    width: clamp(14px, 6vw, 24px);
-    height: clamp(14px, 6vw, 24px);
+    padding: 8px;
   }
 }
