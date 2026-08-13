@@ -142,3 +142,35 @@
     padding: 8px;
   }
 }
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes glowPulse {
+  0% { box-shadow: 0 0 5px rgba(232, 184, 109, 0.2); }
+  50% { box-shadow: 0 0 20px rgba(232, 184, 109, 0.5); }
+  100% { box-shadow: 0 0 5px rgba(232, 184, 109, 0.2); }
+}
+
+.difficultyGolden {
+  border: 2px solid $gold !important;
+  animation: glowPulse 3s infinite ease-in-out;
+  
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.2),
+      transparent
+    );
+    background-size: 200% 100%;
+    animation: shimmer 4s infinite linear;
+    pointer-events: none;
+  }
+}
