@@ -10,6 +10,7 @@ interface BingoState {
   
   // Actions
   addCard: (card: BingoCard) => void;
+  updateCard: (card: BingoCard) => void;
   deleteCard: (cardId: string) => void;
   completeCell: (cardId: string, cellId: string, photoId?: string) => void;
   resetCard: (cardId: string) => void;
@@ -31,6 +32,13 @@ export const useBingoStore = create<BingoState>()(
         set((state) => ({
           cards: [...state.cards, card],
           currentCardId: card.id,
+        })),
+
+      updateCard: (updatedCard) =>
+        set((state) => ({
+          cards: state.cards.map((card) =>
+            card.id === updatedCard.id ? updatedCard : card
+          ),
         })),
 
       deleteCard: (cardId) =>
