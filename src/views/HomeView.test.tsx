@@ -12,7 +12,7 @@ describe('HomeView', () => {
       setCurrentCard: vi.fn(),
     });
 
-    render(<HomeView />);
+    render(<HomeView onCreateNew={vi.fn()} onPlay={vi.fn()} />);
     
     expect(screen.getByText(/My Bingo Cards/i)).toBeInTheDocument();
     expect(screen.getByText(/No bingo cards yet/i)).toBeInTheDocument();
@@ -29,7 +29,7 @@ describe('HomeView', () => {
       setCurrentCard: vi.fn(),
     });
 
-    render(<HomeView />);
+    render(<HomeView onCreateNew={vi.fn()} onPlay={vi.fn()} />);
 
     expect(screen.getByText('Test Bingo 1')).toBeInTheDocument();
     expect(screen.getByText('Test Bingo 2')).toBeInTheDocument();

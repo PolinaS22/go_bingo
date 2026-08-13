@@ -1,56 +1,83 @@
 import { useState } from 'react';
 import { useBingoStore } from './store/useBingoStore';
 import { useBingoLogic } from './store/useBingoLogic';
-import { BingoGrid } from './components/bingo/BingoGrid';
 import { ThemeWrapper } from './components/bingo/ThemeWrapper';
+import { HomeView } from './views/HomeView';
+import { EditorView } from './views/EditorView';
+import { PlayView } from './views/PlayView';
 import MemoriesView from './views/MemoriesView';
-import { Camera } from 'lucide-react';
+import { Home, PlusSquare, Play, Camera } from 'lucide-react';
+import styles from './App.module.scss';
+
+type View = 'home' | 'editor' | 'play' | 'memories';
 
 function App() {
-  const [view, setView] = useState<'play' | 'memories'>('play');
-  const { currentCard, toggleCell } = useBingoLogic();
-  const { addCard, setCurrentCard } = useBingoStore();
+  const [view, setView] = useState<View>('home');
+  const { currentCard } = useBingoLogic();
+  const { currentCardId } = useBingoStore();
 
-  if (view === 'memories') {
-    return <MemoriesView onBack={() => setView('play')} />;
-  }
-
-  if (!currentCard) return <div>Loading...</div>;
+  const renderView = () => {
+    switch (view) {
+      case 'home':
+        return (
+          <HomeView 
+            onCreateNew={() => setView('editor')} 
+            onPlay={() => setView('play')} 
+          />
+        );
+      case 'editor':
+        return <EditorView onSave={() => setView('home')} />;
+      case 'play':
+        return <PlayView />;
+      case 'memories':
+        return <MemoriesView onBack={() => setView('home')} />;
+      default:
+        return <HomeView onCreateNew={() => setView('editor')} onPlay={() => setView('play')} />;
+    }
+  };
 
   return (
-    <ThemeWrapper theme={currentCard.theme}>
-      <div style={{ 
-        minHeight: '100vh', 
-        backgroundColor: 'var(--background-color)',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '2rem',
-        position: 'relative'
-      }}>
-        <button 
-          onClick={() => setView('memories')}
-          style={{
-            position: 'absolute',
-            top: '2rem',
-            right: '2rem',
-            background: 'white',
-            border: 'none',
-            borderRadius: '50%',
-            width: '48px',
-            height: '48px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-            cursor: 'pointer',
-            zIndex: 10
-          }}
-        >
-          <Camera size={24} />
-        </button>
-        <BingoGrid card={currentCard} onCellClick={toggleCell} />
+    <ThemeWrapper theme={currentCard?.theme as any}>
+      <div className={styles.appContainer}>
+        <main className={styles.content}>
+          {renderView()}
+        </main>
+
+        <nav className={styles.navigation}>
+          <button 
+            className={view === 'home' ? styles.active : ''} 
+            onClick={() => setView('home')}
+          >
+            <Home />
+            <span>Home</span>
+          </button>
+          
+          <button 
+            className={view === 'editor' ? styles.active : ''} 
+            onClick={() => setView('editor')}
+          >
+            <PlusSquare />
+            <span>New</span>
+          </button>
+
+          <button 
+            className={view === 'play' ? styles.active : ''} 
+            onClick={() => setView('play')}
+            disabled={!currentCardId}
+            style={{ opacity: currentCardId ? 1 : 0.5 }}
+          >
+            <Play />
+            <span>Play</span>
+          </button>
+
+          <button 
+            className={view === 'memories' ? styles.active : ''} 
+            onClick={() => setView('memories')}
+          >
+            <Camera />
+            <span>Memories</span>
+          </button>
+        </nav>
       </div>
     </ThemeWrapper>
   );

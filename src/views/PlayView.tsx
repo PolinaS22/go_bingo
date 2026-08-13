@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { useBingoStore } from '../store/useBingoStore';
+import { useBingoLogic } from '../store/useBingoLogic';
 import { BingoGrid } from '../components/bingo/BingoGrid';
 import styles from './PlayView.module.scss';
 
 export const PlayView: React.FC = () => {
   const { currentCardId, cards } = useBingoStore();
+  const { toggleCell } = useBingoLogic();
   const [showModal, setShowModal] = useState(false);
 
   const currentCard = cards.find((c) => c.id === currentCardId);
@@ -24,7 +26,7 @@ export const PlayView: React.FC = () => {
       </header>
       
       <main className={styles.main}>
-        <BingoGrid />
+        <BingoGrid card={currentCard} onCellClick={toggleCell} />
       </main>
 
       {showModal && (

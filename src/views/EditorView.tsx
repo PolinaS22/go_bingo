@@ -3,7 +3,7 @@ import { useBingoStore } from '../store/useBingoStore';
 import { Difficulty, BingoTheme } from '../types/bingo';
 import styles from './EditorView.module.scss';
 
-export const EditorView: React.FC = () => {
+export const EditorView: React.FC<{ onSave: () => void }> = ({ onSave }) => {
   const { addCard } = useBingoStore();
   const [title, setTitle] = useState('');
   const [difficulty, setDifficulty] = useState<Difficulty>('medium');
@@ -22,12 +22,13 @@ export const EditorView: React.FC = () => {
       id: crypto.randomUUID(),
       title,
       difficulty,
-      cells: [], // Will be filled by engine/logic usually, but brief says "Form to add challenges"
+      cells: [], // Will be filled by engine/logic usually
       theme: defaultTheme,
       size: 5,
       createdAt: Date.now(),
     };
     addCard(newCard as any);
+    onSave();
   };
 
   return (

@@ -12,7 +12,7 @@ describe('EditorView', () => {
       setCurrentCard: vi.fn(),
     });
 
-    render(<EditorView />);
+    render(<EditorView onSave={vi.fn()} />);
     
     expect(screen.getByText(/Create New Bingo Card/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Title/i)).toBeInTheDocument();
@@ -25,7 +25,7 @@ describe('EditorView', () => {
       setCurrentCard: vi.fn(),
     });
 
-    render(<EditorView />);
+    render(<EditorView onSave={vi.fn()} />);
     const titleInput = screen.getByLabelText(/Title/i) as HTMLInputElement;
     fireEvent.change(titleInput, { target: { value: 'My Awesome Bingo' } });
     expect(titleInput.value).toBe('My Awesome Bingo');

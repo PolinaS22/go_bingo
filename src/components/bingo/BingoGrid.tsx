@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { useBingoStore } from '../store/useBingoStore';
-import styles from './BingoGrid.module.scss';
 import { BingoCell } from './BingoCell';
+import styles from './BingoGrid.module.scss';
 import { BingoCard as BingoCardType } from '../../types/bingo';
 import { motion, AnimatePresence } from 'framer-motion';
 

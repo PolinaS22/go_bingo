@@ -8,10 +8,10 @@ interface ThemeWrapperProps {
 
 export const ThemeWrapper: React.FC<ThemeWrapperProps> = ({ theme, children }) => {
   const cssVariables = {
-    '--primary-color': theme.primaryColor,
-    '--secondary-color': theme.secondaryColor,
-    '--background-color': theme.backgroundColor,
-    '--text-color': theme.textColor,
+    '--primary-color': theme?.primaryColor || '#3b82f6',
+    '--secondary-color': theme?.secondaryColor || '#1d4ed8',
+    '--background-color': theme?.backgroundColor || '#f8fafc',
+    '--text-color': theme?.textColor || '#1f2937',
   } as React.CSSProperties;
 
   return (
