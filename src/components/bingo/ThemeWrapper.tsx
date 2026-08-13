@@ -1,22 +1,27 @@
-import React from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import { BingoTheme } from '../../types/bingo';
+import { DEFAULT_THEME } from '../../core/defaults';
 
 interface ThemeWrapperProps {
-  theme: BingoTheme;
-  children: React.ReactNode;
+  theme: BingoTheme | undefined;
+  children: ReactNode;
 }
 
-export const ThemeWrapper: React.FC<ThemeWrapperProps> = ({ theme, children }) => {
-  const cssVariables = {
-    '--primary-color': theme?.primaryColor || '#3b82f6',
-    '--secondary-color': theme?.secondaryColor || '#1d4ed8',
-    '--background-color': theme?.backgroundColor || '#f8fafc',
-    '--text-color': theme?.textColor || '#1f2937',
-  } as React.CSSProperties;
+type ThemeCssVariables = CSSProperties & {
+  '--primary-color': string;
+  '--secondary-color': string;
+  '--background-color': string;
+  '--text-color': string;
+};
 
-  return (
-    <div style={cssVariables}>
-      {children}
-    </div>
-  );
+export const ThemeWrapper = ({ theme, children }: ThemeWrapperProps) => {
+  const resolved = theme ?? DEFAULT_THEME;
+  const cssVariables: ThemeCssVariables = {
+    '--primary-color': resolved.primaryColor,
+    '--secondary-color': resolved.secondaryColor,
+    '--background-color': resolved.backgroundColor,
+    '--text-color': resolved.textColor,
+  };
+
+  return <div style={cssVariables}>{children}</div>;
 };

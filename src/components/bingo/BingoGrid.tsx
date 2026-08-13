@@ -1,66 +1,87 @@
-import React, { useState } from 'react';
+import type { CSSProperties } from 'react';
+import { BingoLine } from '../../core/engine';
+import { BingoCell as BingoCellType, GridSize } from '../../types/bingo';
 import { BingoCell } from './BingoCell';
 import styles from './BingoGrid.module.scss';
-import { BingoCard as BingoCardType } from '../../types/bingo';
-import { motion, AnimatePresence } from 'framer-motion';
 
 interface BingoGridProps {
-  card: BingoCardType;
+  size: GridSize;
+  cells: BingoCellType[];
   onCellClick: (cellId: string) => void;
+  completedLines?: BingoLine[];
+  selectedCellId?: string | null;
 }
 
-export const BingoGrid: React.FC<BingoGridProps> = ({ card, onCellClick }) => {
-  const isBingo = false; // Simplified for now
+function stampStyle(line: BingoLine, size: number): CSSProperties {
+  const unit = 100 / size;
 
+  if (line.kind === 'row') {
+    return {
+      top: `${line.index * unit + unit / 2}%`,
+      left: '5%',
+      width: '90%',
+      transform: 'translateY(-50%) rotate(-6deg)',
+    };
+  }
+
+  if (line.kind === 'column') {
+    return {
+      top: '50%',
+      left: `${line.index * unit + unit / 2}%`,
+      width: '90%',
+      transform: 'translate(-50%, -50%) rotate(84deg)',
+    };
+  }
+
+  if (line.kind === 'diagonal') {
+    return {
+      top: '50%',
+      left: '8%',
+      width: '84%',
+      transform: 'translateY(-50%) rotate(45deg)',
+    };
+  }
+
+  return {
+    top: '50%',
+    left: '8%',
+    width: '84%',
+    transform: 'translateY(-50%) rotate(-45deg)',
+  };
+}
+
+export const BingoGrid = ({
+  size,
+  cells,
+  onCellClick,
+  completedLines = [],
+  selectedCellId = null,
+}: BingoGridProps) => {
   return (
-    <div className={styles.gridContainer}>
-      <h2 className={styles.title}>{card.title}</h2>
-      <div 
+    <div className={styles.wrap}>
+      <div
         className={styles.grid}
-        style={{ 
-          gridTemplateColumns: `repeat(${card.size}, 1fr)`
-        }}
+        style={{ gridTemplateColumns: `repeat(${size}, 1fr)` }}
       >
-        {card.cells.map((cell) => (
-          <BingoCell 
-            key={cell.id} 
-            cell={cell} 
-            onClick={() => onCellClick(cell.id)} 
+        {cells.map((cell) => (
+          <BingoCell
+            key={cell.id}
+            cell={cell}
+            onClick={onCellClick}
+            selected={selectedCellId === cell.id}
           />
         ))}
       </div>
-
-      <AnimatePresence>
-        {card.completedAt && (
-          <motion.div 
-            className={styles.celebration}
-            initial={{ opacity: 0, scale: 0.5 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <div className={styles.particles}>
-              {[...Array(20)].map((_, i) => (
-                <motion.div
-                  key={i}
-                  className={styles.particle}
-                  animate={{
-                    y: [-20, -100 - Math.random() * 200],
-                    x: [0, (Math.random() - 0.5) * 200],
-                    opacity: [1, 0],
-                    scale: [1, 0]
-                  }}
-                  transition={{
-                    duration: 1 + Math.random(),
-                    repeat: Infinity,
-                    delay: Math.random() * 2
-                  }}
-                />
-              ))}
-            </div>
-            <div className={styles.bingoText}>BINGO!</div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {completedLines.map((line) => (
+        <div
+          key={line.id}
+          className={styles.lineStamp}
+          style={stampStyle(line, size)}
+          aria-hidden
+        >
+          Bingo!
+        </div>
+      ))}
     </div>
   );
 };

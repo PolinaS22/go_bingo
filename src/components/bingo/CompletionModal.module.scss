@@ -1,8 +1,9 @@
+@use '../../styles/tokens.scss' as *;
+
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(4px);
+  background: rgba(61, 41, 20, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -11,83 +12,127 @@
 }
 
 .modal {
-  background: #fff;
-  border-radius: 20px;
-  padding: 32px;
+  background: $cream;
+  border: 2px dashed $ink;
+  border-radius: 8px;
+  padding: 28px 24px;
   max-width: 480px;
   width: 100%;
   position: relative;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-  color: #1a1a1a;
+  box-shadow: 0 16px 36px rgba(61, 41, 20, 0.16);
+  color: $ink-dark;
 
-  h2 { margin: 0 0 16px; font-size: 1.5rem; }
+  h2 {
+    margin: 0 0 16px;
+    font-size: 1.25rem;
+    color: $ink;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
 }
 
 .closeButton {
-    position: absolute;
-    top: 16px;
-    right: 16px;
-    background: none;
-    border: none;
-    font-size: 1.5rem;
-    cursor: pointer;
-    color: #666;
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: $muted;
 }
 
 .content {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
-.description { color: #555; line-height: 1.5; }
+.description {
+  color: $muted;
+  line-height: 1.5;
+}
 
 .rewardSection {
-    background: #f0f9ff;
-    border: 1px solid #bae6fd;
-    border-radius: 12px;
-    padding: 16px;
+  background: rgba(232, 184, 109, 0.18);
+  border: 1px dashed $gold;
+  border-radius: 8px;
+  padding: 16px;
 
-    h4 { margin: 0 0 8px; color: #0369a1; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; }
-    .rewardTitle { font-weight: bold; margin: 0; }
-    .rewardDesc { margin: 4px 0 0; font-size: 0.9rem; color: #666; }
+  h4 {
+    margin: 0 0 8px;
+    color: $ink;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+  }
+
+  .rewardTitle {
+    font-weight: bold;
+    margin: 0;
+  }
+
+  .rewardDesc {
+    margin: 4px 0 0;
+    font-size: 0.9rem;
+    color: $muted;
+  }
 }
 
-.actionArea, .previewArea {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
+.actionArea,
+.previewArea {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .uploadBox {
-    border: 2px dashed #e5e7eb;
-    border-radius: 12px;
-    padding: 24px;
-    text-align: center;
-    cursor: pointer;
-    transition: border-color 0.2s;
+  border: 2px dashed $border;
+  border-radius: 8px;
+  padding: 24px;
+  text-align: center;
+  cursor: pointer;
 
-    &:hover { border-color: #3b82f6; }
-    label { cursor: pointer; display: block; width: 100%; }
+  &:hover {
+    border-color: $ink;
+  }
+
+  label {
+    cursor: pointer;
+    display: block;
+    width: 100%;
+  }
 }
 
-.completeBtn, .closeBtn {
-    background: #3b82f6;
-    color: #fff;
-    border: none;
-    padding: 14px;
-    border-radius: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: opacity 0.2s;
+.completeBtn,
+.closeBtn {
+  background: $ink;
+  color: #fff;
+  border: none;
+  padding: 14px;
+  border-radius: 8px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
 
-    &:hover { opacity: 0.9; }
-    &:disabled { background: #d1d5db; cursor: not-allowed; }
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
 }
 
 .photo {
-    width: 100%;
-    border-radius: 12px;
-    max-height: 320px;
-    object-fit: cover;
+  width: 100%;
+  border-radius: 8px;
+  max-height: 320px;
+  object-fit: cover;
+}
+
+.photoPlaceholder {
+  padding: 2rem;
+  text-align: center;
+  color: $muted;
+  background: $paper;
+  border-radius: 8px;
 }

@@ -1,34 +1,47 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useBingoStore } from '../store/useBingoStore';
-import { useBingoLogic } from '../store/useBingoLogic';
-import { BingoGrid } from '../components/bingo/BingoGrid';
+import { useEffect, useRef, useState } from 'react';
+import { AnimatePresence } from 'framer-motion';
+import { Camera, Sparkles } from 'lucide-react';
+import { BingoCardSheet } from '../components/bingo/BingoCardSheet';
+import { BingoCelebration } from '../components/bingo/BingoCelebration';
 import { CompletionModal } from '../components/bingo/CompletionModal';
 import { RewardPopup } from '../components/bingo/RewardPopup';
-import { BingoCelebration } from '../components/bingo/BingoCelebration';
+import { isCellCompleted } from '../core/defaults';
+import { createRandomReward } from '../core/rewards';
+import { useBingoLogic } from '../store/useBingoLogic';
+import { useBingoStore } from '../store/useBingoStore';
 import { Reward } from '../types/bingo';
 import styles from './PlayView.module.scss';
-import { AnimatePresence } from 'framer-motion';
 
-export const PlayView: React.FC = () => {
-  const { currentCardId, cards, completeCell } = useBingoStore();
-  const { currentCard, completedLineCount } = useBingoLogic();
-  
+interface PlayViewProps {
+  onMemories: () => void;
+}
+
+type PlayPopup =
+  | { kind: 'golden' }
+  | { kind: 'reward'; reward: Reward }
+  | { kind: 'line' }
+  | { kind: 'full' };
+
+export const PlayView = ({ onMemories }: PlayViewProps) => {
+  const { completeCell } = useBingoStore();
+  const { currentCard, completedLineCount, completedLines, stats } = useBingoLogic();
+
   const [selectedCellId, setSelectedCellId] = useState<string | null>(null);
-  const [showBingoCelebration, setShowBingoCelebration] = useState(false);
-  const [unlockedReward, setUnlockedReward] = useState<Reward | null>(null);
-  
+  const [queue, setQueue] = useState<PlayPopup[]>([]);
+
   const prevLineCount = useRef(completedLineCount);
+  const activePopup = queue[0] ?? null;
 
   useEffect(() => {
     if (completedLineCount > prevLineCount.current) {
-      setShowBingoCelebration(true);
-      // Auto-hide celebration after 3 seconds
-      const timer = setTimeout(() => setShowBingoCelebration(false), 3000);
-      prevLineCount.current = completedLineCount;
-      return () => clearTimeout(timer);
+      const isFullCard = currentCard?.completedAt !== undefined;
+      setQueue((prev) => [
+        ...prev,
+        isFullCard ? { kind: 'full' } : { kind: 'line' },
+      ]);
     }
     prevLineCount.current = completedLineCount;
-  }, [completedLineCount]);
+  }, [completedLineCount, currentCard?.completedAt]);
 
   if (!currentCard) {
     return (
@@ -38,39 +51,80 @@ export const PlayView: React.FC = () => {
     );
   }
 
-  const selectedCell = currentCard.cells.find(c => c.id === selectedCellId);
+  const selectedCell = currentCard.cells.find((cell) => cell.id === selectedCellId);
+  const firstOpenCell = currentCard.cells.find((cell) => !isCellCompleted(cell.completedAt));
 
-  const handleCellClick = (cellId: string) => {
-    setSelectedCellId(cellId);
+  const advanceQueue = () => {
+    setQueue((prev) => prev.slice(1));
   };
 
   const handleComplete = (photoId?: string) => {
-    if (currentCardId && selectedCellId) {
-      const cell = currentCard.cells.find(c => c.id === selectedCellId);
-      completeCell(currentCardId, selectedCellId, photoId);
-      setSelectedCellId(null);
-      
-      // If cell had a reward, show it
-      if (cell?.reward) {
-        setUnlockedReward(cell.reward);
-      }
+    if (!selectedCellId) {
+      return;
     }
+
+    const cell = currentCard.cells.find((item) => item.id === selectedCellId);
+    if (!cell || isCellCompleted(cell.completedAt)) {
+      setSelectedCellId(null);
+      return;
+    }
+
+    const reward = cell.reward ?? createRandomReward();
+    completeCell(currentCard.id, selectedCellId, photoId, reward);
+    setSelectedCellId(null);
+
+    const next: PlayPopup[] = [];
+    if (cell.difficulty === 'GOLDEN') {
+      next.push({ kind: 'golden' });
+    }
+    next.push({ kind: 'reward', reward });
+    setQueue((prev) => [...prev, ...next]);
   };
 
   return (
     <div className={styles.container}>
       <header className={styles.header}>
-        <h1>{currentCard.title}</h1>
+        <h1 className={styles.visuallyHidden}>{currentCard.title}</h1>
       </header>
-      
+
       <main className={styles.main}>
-        <BingoGrid card={currentCard} onCellClick={handleCellClick} />
+        <BingoCardSheet
+          title={currentCard.title}
+          size={currentCard.size}
+          cells={currentCard.cells}
+          createdAt={currentCard.createdAt}
+          completedLines={completedLines}
+          selectedCellId={selectedCellId}
+          onCellClick={setSelectedCellId}
+          accentColor={currentCard.theme.primaryColor}
+          paperColor={currentCard.theme.backgroundColor}
+        />
       </main>
+
+      <div className={styles.actions}>
+        <button
+          type="button"
+          className={styles.primaryButton}
+          onClick={() => {
+            if (firstOpenCell) {
+              setSelectedCellId(firstOpenCell.id);
+            }
+          }}
+          disabled={!firstOpenCell}
+        >
+          <Sparkles size={16} />
+          Complete a Challenge
+        </button>
+        <button type="button" className={styles.secondaryButton} onClick={onMemories}>
+          <Camera size={16} />
+          Memories
+        </button>
+      </div>
 
       <AnimatePresence>
         {selectedCell && (
-          <CompletionModal 
-            cell={selectedCell} 
+          <CompletionModal
+            cell={selectedCell}
             onClose={() => setSelectedCellId(null)}
             onComplete={handleComplete}
           />
@@ -78,17 +132,23 @@ export const PlayView: React.FC = () => {
       </AnimatePresence>
 
       <AnimatePresence>
-        {unlockedReward && (
-          <RewardPopup 
-            reward={unlockedReward} 
-            onClose={() => setUnlockedReward(null)} 
+        {activePopup?.kind === 'reward' && (
+          <RewardPopup
+            reward={activePopup.reward}
+            onClose={advanceQueue}
           />
         )}
       </AnimatePresence>
 
-      <BingoCelebration 
-        show={showBingoCelebration} 
-        onClose={() => setShowBingoCelebration(false)} 
+      <BingoCelebration
+        show={activePopup?.kind === 'golden' || activePopup?.kind === 'line' || activePopup?.kind === 'full'}
+        variant={
+          activePopup?.kind === 'golden' || activePopup?.kind === 'line' || activePopup?.kind === 'full'
+            ? activePopup.kind
+            : 'line'
+        }
+        stats={stats ?? undefined}
+        onClose={advanceQueue}
       />
     </div>
   );

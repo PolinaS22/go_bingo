@@ -1,5 +1,6 @@
 export type Difficulty = 'NORMAL' | 'HARD' | 'GOLDEN';
 export type CellStyle = 'glass' | 'solid' | 'bordered';
+export type GridSize = 2 | 3 | 4 | 5;
 
 export interface Background {
   type: 'color' | 'gradient' | 'image';
@@ -17,22 +18,19 @@ export interface Reward {
 export interface BingoCell {
   id: string;
   title: string;
-  text?: string; // For backward compatibility
   description?: string;
   icon?: string;
   difficulty: Difficulty;
   customBackground?: Background;
-  customImage?: string;
   reward?: Reward;
-  completedAt?: string;
-  isCompleted?: boolean; // For backward compatibility
+  completedAt?: number;
   photoId?: string;
-  photoRequired?: boolean;
-  position?: number; // Added for logic
+  photoRequired: boolean;
+  position: number;
 }
 
 export interface BingoTheme {
-  id: string; // Added ID
+  id: string;
   primaryColor: string;
   secondaryColor: string;
   backgroundColor: string;
@@ -46,11 +44,26 @@ export interface BingoCard {
   id: string;
   title: string;
   description?: string;
-  size: number;
+  size: GridSize;
   cells: BingoCell[];
   theme: BingoTheme;
   isFrozen: boolean;
   createdAt: number;
   updatedAt: number;
-  completedAt?: number; // Added completedAt
+  completedAt?: number;
 }
+
+export interface PersistedBingoState {
+  cards: BingoCard[];
+  currentCardId: string | null;
+}
+
+export interface BackupPayload {
+  version: 1;
+  timestamp: string;
+  state: PersistedBingoState;
+  photos: Record<string, string>;
+}
+
+export const BINGO_STORAGE_KEY = 'bingo-storage';
+export const BACKUP_VERSION = 1;

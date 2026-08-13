@@ -1,48 +1,26 @@
+@use '../../styles/tokens.scss' as *;
+
 .cell {
   position: relative;
   aspect-ratio: 1 / 1;
   width: 100%;
-  padding: 0.5rem;
-  border: 2px solid var(--primary-color, #e2e8f0);
-  border-radius: 0.5rem;
-  background-color: var(--card-bg, #ffffff);
+  min-width: 0;
+  padding: 0.35rem 0.3rem 0.45rem;
+  border: none;
+  border-right: 1px solid $ink;
+  border-bottom: 1px solid $ink;
+  background-color: transparent;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
   overflow: hidden;
-  transition: border-color 0.2s, background-color 0.2s;
-  
+  color: $ink;
+
   &:focus-visible {
-    outline: 2px solid var(--secondary-color, #3b82f6);
-    outline-offset: 2px;
-  }
-}
-
-@keyframes goldenGlow {
-  0% { box-shadow: 0 0 5px rgba(251, 191, 36, 0.4); border-color: #fbbf24; }
-  50% { box-shadow: 0 0 20px rgba(251, 191, 36, 0.8); border-color: #f59e0b; }
-  100% { box-shadow: 0 0 5px rgba(251, 191, 36, 0.4); border-color: #fbbf24; }
-}
-
-.difficultyNormal {
-  border-color: var(--primary-color, #e2e8f0);
-}
-
-.difficultyHard {
-  border-color: #ef4444;
-  background-color: #fef2f2;
-}
-
-.difficultyGolden {
-  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
-  border-color: #d97706;
-  animation: goldenGlow 3s infinite ease-in-out;
-  
-  .text, .title {
-    color: #ffffff;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    outline: 2px solid $ink;
+    outline-offset: -2px;
   }
 }
 
@@ -58,7 +36,6 @@
   height: 100%;
   object-fit: cover;
   z-index: 0;
-  opacity: 0.6;
 }
 
 .content {
@@ -66,51 +43,91 @@
   z-index: 1;
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.2rem;
+  height: 100%;
+  width: 100%;
+  min-height: 0;
+}
+
+.textOnly {
+  justify-content: center;
 }
 
 .icon {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.iconImage {
+  width: clamp(18px, 4.5vw, 36px);
+  height: clamp(18px, 4.5vw, 36px);
+  object-fit: contain;
+  margin-top: auto;
 }
 
 .title {
   font-weight: 700;
-  font-size: 0.9rem;
-}
-
-.description {
-  font-size: 0.75rem;
-  opacity: 0.8;
-}
-
-.text {
-  font-size: clamp(0.75rem, 2vw, 1rem);
-  font-weight: 500;
-  color: var(--text-color, #1e293b);
+  font-size: clamp(0.45rem, 1.6vw, 0.72rem);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  line-height: 1.15;
   word-break: break-word;
+  color: $ink;
+}
+
+.difficultyGolden {
+  background-color: rgba(232, 184, 109, 0.28);
+}
+
+.selected {
+  box-shadow: inset 0 0 0 2px $ink;
 }
 
 .completed {
-  border-color: var(--secondary-color, #3b82f6);
-  background-color: rgba(59, 130, 246, 0.05);
-
-  .text {
-    opacity: 0.5;
+  .title {
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
   }
 }
 
-.overlay {
+.doneBanner {
   position: absolute;
-  inset: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: rgba(59, 130, 246, 0.1);
-  pointer-events: none;
+  gap: 0.25rem;
+  background: rgba(196, 92, 88, 0.92);
+  color: #fff;
+  font-size: clamp(0.45rem, 1.5vw, 0.7rem);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.25rem;
 }
 
-.checkMark {
-  font-size: 2rem;
-  color: var(--secondary-color, #3b82f6);
-  font-weight: bold;
+.doneStar {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  z-index: 2;
+  color: $gold;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.2));
+  line-height: 0;
+}
+
+@media (max-width: 768px) {
+  .cell {
+    padding: 0.22rem 0.15rem 0.3rem;
+  }
+
+  .iconImage {
+    width: clamp(14px, 6vw, 24px);
+    height: clamp(14px, 6vw, 24px);
+  }
 }

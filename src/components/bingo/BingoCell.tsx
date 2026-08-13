@@ -1,84 +1,73 @@
-import React, { useEffect, useState } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
-import clsx from 'clsx'
-import { BingoCell as BingoCellType } from '../../types/bingo'
-import { getPhoto } from '../../services/storage'
-import styles from './BingoCell.module.scss'
+import type { CSSProperties } from 'react';
+import clsx from 'clsx';
+import { Check, Star } from 'lucide-react';
+import { isCellIconPath } from '../../core/cellPresets';
+import { isCellCompleted } from '../../core/defaults';
+import { usePhotoUrl } from '../../hooks/usePhotoUrl';
+import { BingoCell as BingoCellType } from '../../types/bingo';
+import styles from './BingoCell.module.scss';
 
 interface BingoCellProps {
-  cell: BingoCellType
-  onClick: (id: string) => void
-  isGolden?: boolean
+  cell: BingoCellType;
+  onClick: (id: string) => void;
+  selected?: boolean;
 }
 
-export const BingoCell: React.FC<BingoCellProps> = ({ cell, onClick, isGolden }) => {
-  const [photoUrl, setPhotoUrl] = useState<string | null>(null)
-  const isCompleted = cell.isCompleted || !!cell.completedAt
-  const effectiveDifficulty = isGolden ? 'GOLDEN' : cell.difficulty || 'NORMAL'
+export const BingoCell = ({ cell, onClick, selected = false }: BingoCellProps) => {
+  const isCompleted = isCellCompleted(cell.completedAt);
+  const photoUrl = usePhotoUrl(cell.photoId, isCompleted);
 
-  useEffect(() => {
-    let url: string | null = null
-    if (isCompleted && cell.photoId) {
-      getPhoto(cell.photoId).then((blob) => {
-        if (blob) {
-          url = URL.createObjectURL(blob)
-          setPhotoUrl(url)
-        }
-      })
-    }
-    return () => {
-      if (url) URL.revokeObjectURL(url)
-    }
-  }, [isCompleted, cell.photoId])
-
-  const customStyle: React.CSSProperties = {}
+  const customStyle: CSSProperties = {};
   if (cell.customBackground) {
     if (cell.customBackground.type === 'color' || cell.customBackground.type === 'gradient') {
-      customStyle.background = cell.customBackground.value
+      customStyle.background = cell.customBackground.value;
     } else if (cell.customBackground.type === 'image') {
-      customStyle.backgroundImage = `url(${cell.customBackground.value})`
+      customStyle.backgroundImage = `url(${cell.customBackground.value})`;
     }
-  } else if (cell.customImage) {
-    customStyle.backgroundImage = `url(${cell.customImage})`
   }
 
   return (
-    <motion.button
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
+    <button
+      type="button"
       className={clsx(styles.cell, {
         [styles.completed]: isCompleted,
-        [styles.difficultyNormal]: effectiveDifficulty === 'NORMAL',
-        [styles.difficultyHard]: effectiveDifficulty === 'HARD',
-        [styles.difficultyGolden]: effectiveDifficulty === 'GOLDEN',
-        [styles.hasCustomBackground]: !!(cell.customBackground || cell.customImage),
+        [styles.selected]: selected,
+        [styles.difficultyGolden]: cell.difficulty === 'GOLDEN' && !isCompleted,
+        [styles.hasCustomBackground]: !!cell.customBackground,
       })}
       style={customStyle}
       onClick={() => onClick(cell.id)}
-      role="button"
       aria-pressed={isCompleted}
+      aria-label={`${cell.title}, ${cell.difficulty}`}
     >
       {photoUrl && isCompleted && (
         <img src={photoUrl} className={styles.photoBackground} alt="" />
       )}
 
-      <div className={styles.content}>
-        {cell.icon && <span className={styles.icon}>{cell.icon}</span>}
-        {cell.title && <span className={styles.title}>{cell.title}</span>}
-        <span className={styles.text}>{cell.text || cell.description}</span>
-      </div>
-      <AnimatePresence>
-        {isCompleted && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.5 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.5 }}
-            className={styles.overlay}
-          >
-            <div className={styles.checkMark}>✓</div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.button>
-  )
-}
+      {!(isCompleted && photoUrl) && (
+        <div className={clsx(styles.content, !cell.icon && styles.textOnly)}>
+          <span className={styles.title}>{cell.title}</span>
+          {cell.icon && (
+            isCellIconPath(cell.icon) ? (
+              <img src={cell.icon} alt="" className={styles.iconImage} />
+            ) : (
+              <span className={styles.icon}>{cell.icon}</span>
+            )
+          )}
+        </div>
+      )}
+
+      {isCompleted && (
+        <>
+          <span className={styles.doneBanner}>
+            <Check size={12} strokeWidth={3} />
+            Done!
+          </span>
+          <span className={styles.doneStar} aria-hidden>
+            <Star size={16} fill="currentColor" />
+          </span>
+        </>
+      )}
+    </button>
+  );
+};

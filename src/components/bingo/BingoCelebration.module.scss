@@ -1,46 +1,96 @@
+@use '../../styles/tokens.scss' as *;
+
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(61, 41, 20, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 2000;
-  pointer-events: auto;
+  padding: 20px;
 }
 
-.content {
-    text-align: center;
-    position: relative;
+.card,
+.goldenCard {
+  text-align: center;
+  position: relative;
+  width: min(360px, 100%);
+  padding: 28px 24px 22px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.card {
+  background: $cream;
+  border: 2px dashed $ink;
+  color: $ink;
+}
+
+.goldenCard {
+  background: #f6e3b3;
+  border: 2px solid $gold;
+  color: #8a5a12;
+}
+
+.crown {
+  color: $gold;
+  margin-bottom: 8px;
 }
 
 .text {
-    font-size: 8rem;
-    font-weight: 900;
-    color: #fff;
-    text-shadow: 0 0 20px rgba(255, 255, 255, 0.5), 0 0 40px rgba(255, 215, 0, 0.8);
-    margin: 0;
-    letter-spacing: 0.1em;
+  font-size: clamp(1.6rem, 5vw, 2.2rem);
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin: 0 0 8px;
 }
 
 .subtext {
-    font-size: 2rem;
-    color: #ffd700;
-    font-weight: 700;
-    text-transform: uppercase;
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin: 0 0 18px;
+}
+
+.stats {
+  list-style: none;
+  margin: 0 0 18px;
+  padding: 0;
+  display: grid;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  color: inherit;
+}
+
+.action {
+  min-width: 140px;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  background: $gold;
+  color: $ink-dark;
+}
+
+.card .action {
+  background: $ink;
+  color: #fff;
 }
 
 .particles {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    pointer-events: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  pointer-events: none;
 }
 
 .particle {
-    position: absolute;
-    width: 8px;
-    height: 8px;
-    background: #ffd700;
-    border-radius: 50%;
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: $gold;
+  border-radius: 50%;
 }

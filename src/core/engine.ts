@@ -1,108 +1,65 @@
-/**
- * Checks if there's a bingo (full row, column, or diagonal)
- * @param completedPositions - Array of indices that are completed
- * @param size - The dimension of the N x N grid
- */
-export const checkBingo = (completedPositions: number[], size: number): boolean => {
-  const completedSet = new Set(completedPositions);
+export type BingoLineKind = 'row' | 'column' | 'diagonal' | 'antidiagonal';
 
-  // Rows
-  for (let r = 0; r < size; r++) {
-    let complete = true;
-    for (let c = 0; c < size; c++) {
-      if (!completedSet.has(r * size + c)) {
-        complete = false;
-        break;
-      }
-    }
-    if (complete) return true;
+export interface BingoLine {
+  id: string;
+  kind: BingoLineKind;
+  index: number;
+  positions: number[];
+}
+
+export function bingoLineId(kind: BingoLineKind, index: number): string {
+  return `${kind}-${index}`;
+}
+
+function collectLines(size: number): BingoLine[] {
+  const lines: BingoLine[] = [];
+
+  for (let row = 0; row < size; row += 1) {
+    lines.push({
+      id: bingoLineId('row', row),
+      kind: 'row',
+      index: row,
+      positions: Array.from({ length: size }, (_, column) => row * size + column),
+    });
   }
 
-  // Columns
-  for (let c = 0; c < size; c++) {
-    let complete = true;
-    for (let r = 0; r < size; r++) {
-      if (!completedSet.has(r * size + c)) {
-        complete = false;
-        break;
-      }
-    }
-    if (complete) return true;
+  for (let column = 0; column < size; column += 1) {
+    lines.push({
+      id: bingoLineId('column', column),
+      kind: 'column',
+      index: column,
+      positions: Array.from({ length: size }, (_, row) => row * size + column),
+    });
   }
 
-  // Main Diagonal (top-left to bottom-right)
-  let mainDiagComplete = true;
-  for (let i = 0; i < size; i++) {
-    if (!completedSet.has(i * size + i)) {
-      mainDiagComplete = false;
-      break;
-    }
-  }
-  if (mainDiagComplete) return true;
+  lines.push({
+    id: bingoLineId('diagonal', 0),
+    kind: 'diagonal',
+    index: 0,
+    positions: Array.from({ length: size }, (_, index) => index * size + index),
+  });
 
-  // Anti-Diagonal (top-right to bottom-left)
-  let antiDiagComplete = true;
-  for (let i = 0; i < size; i++) {
-    if (!completedSet.has(i * size + (size - 1 - i))) {
-      antiDiagComplete = false;
-      break;
-    }
-  }
-  if (antiDiagComplete) return true;
-
-  return false;
-};
-
-/**
- * Returns the number of completed lines (rows, columns, diagonals)
- */
-export const getBingoLines = (completedPositions: number[], size: number): number => {
-  const completedSet = new Set(completedPositions);
-  let lines = 0;
-
-  // Rows
-  for (let r = 0; r < size; r++) {
-    let complete = true;
-    for (let c = 0; c < size; c++) {
-      if (!completedSet.has(r * size + c)) {
-        complete = false;
-        break;
-      }
-    }
-    if (complete) lines++;
-  }
-
-  // Columns
-  for (let c = 0; c < size; c++) {
-    let complete = true;
-    for (let r = 0; r < size; r++) {
-      if (!completedSet.has(r * size + c)) {
-        complete = false;
-        break;
-      }
-    }
-    if (complete) lines++;
-  }
-
-  // Main Diagonal
-  let mainDiagComplete = true;
-  for (let i = 0; i < size; i++) {
-    if (!completedSet.has(i * size + i)) {
-      mainDiagComplete = false;
-      break;
-    }
-  }
-  if (mainDiagComplete) lines++;
-
-  // Anti-Diagonal
-  let antiDiagComplete = true;
-  for (let i = 0; i < size; i++) {
-    if (!completedSet.has(i * size + (size - 1 - i))) {
-      antiDiagComplete = false;
-      break;
-    }
-  }
-  if (antiDiagComplete) lines++;
+  lines.push({
+    id: bingoLineId('antidiagonal', 0),
+    kind: 'antidiagonal',
+    index: 0,
+    positions: Array.from({ length: size }, (_, index) => index * size + (size - 1 - index)),
+  });
 
   return lines;
-};
+}
+
+export function getCompletedLines(completedPositions: number[], size: number): BingoLine[] {
+  const completed = new Set(completedPositions);
+  return collectLines(size).filter((line) =>
+    line.positions.every((position) => completed.has(position))
+  );
+}
+
+export function getBingoLines(completedPositions: number[], size: number): number {
+  return getCompletedLines(completedPositions, size).length;
+}
+
+export function checkBingo(completedPositions: number[], size: number): boolean {
+  return getBingoLines(completedPositions, size) > 0;
+}
