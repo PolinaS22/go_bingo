@@ -11,6 +11,16 @@ describe('useBingoLogic', () => {
           id: '1',
           title: 'Test Bingo',
           size: 2,
+          difficulty: 'easy',
+          theme: {
+            id: 't1',
+            name: 'Test',
+            primaryColor: '#000',
+            secondaryColor: '#fff',
+            backgroundColor: '#eee',
+            textColor: '#000',
+          },
+          createdAt: Date.now(),
           cells: [
             { id: 'c1', text: 'Cell 1', isCompleted: false, position: 0 },
             { id: 'c2', text: 'Cell 2', isCompleted: false, position: 1 },

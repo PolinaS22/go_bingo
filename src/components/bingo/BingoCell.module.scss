@@ -1,0 +1,67 @@
+.cell {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  width: 100%;
+  padding: 0.5rem;
+  border: 2px solid var(--primary-color, #e2e8f0);
+  border-radius: 0.5rem;
+  background-color: var(--card-bg, #ffffff);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  overflow: hidden;
+  transition: border-color 0.2s, background-color 0.2s;
+  
+  &:focus-visible {
+    outline: 2px solid var(--secondary-color, #3b82f6);
+    outline-offset: 2px;
+  }
+}
+
+.content {
+  z-index: 1;
+}
+
+.text {
+  font-size: clamp(0.75rem, 2vw, 1rem);
+  font-weight: 500;
+  color: var(--text-color, #1e293b);
+  word-break: break-word;
+}
+
+.completed {
+  border-color: var(--secondary-color, #3b82f6);
+  background-color: rgba(59, 130, 246, 0.05);
+
+  .text {
+    opacity: 0.5;
+  }
+}
+
+.golden {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  border-color: #d97706;
+  
+  .text {
+    color: #ffffff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  }
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(59, 130, 246, 0.1);
+  pointer-events: none;
+}
+
+.checkMark {
+  font-size: 2rem;
+  color: var(--secondary-color, #3b82f6);
+  font-weight: bold;
+}
