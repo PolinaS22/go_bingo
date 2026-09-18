@@ -10,6 +10,8 @@ import { BingoCell as BingoCellType } from '../../types/bingo';
 
 import styles from './BingoCell.module.scss';
 
+const emptyStarSrc = `${import.meta.env.BASE_URL}assets/main/star.png`;
+
 export type BingoCellVariant = 'edit' | 'play';
 
 interface BingoCellProps {
@@ -92,7 +94,7 @@ export const BingoCell = ({
               <span>Add challenge</span>
             </>
           ) : (
-            <img src="/assets/main/star.png" alt="" className={styles.emptyStar} />
+            <img src={emptyStarSrc} alt="" className={styles.emptyStar} />
           )}
         </div>
       ) : (

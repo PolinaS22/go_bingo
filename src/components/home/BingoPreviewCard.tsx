@@ -10,6 +10,8 @@ import { BingoCard } from '../../types/bingo'
 
 import styles from './BingoPreviewCard.module.scss'
 
+const cornerStarSrc = `${import.meta.env.BASE_URL}assets/main/star_pearl.png`
+
 const STATUS_LABEL: Record<ReturnType<typeof getHomeCardStatus>, string> = {
   active: 'Active',
   draft: 'Draft',
@@ -33,7 +35,7 @@ export const HomeCardFace = ({ card }: { card: BingoCard }) => {
     >
       <span className={styles.top}>
         <span className={styles.title}>{card.title}</span>
-        <img className={styles.cornerStar} src="/assets/main/star_pearl.png" alt="" />
+        <img className={styles.cornerStar} src={cornerStarSrc} alt="" />
       </span>
 
       <span className={styles.media}>

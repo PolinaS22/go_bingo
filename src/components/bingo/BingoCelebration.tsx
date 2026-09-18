@@ -31,25 +31,25 @@ interface ParticleConfig {
 const PARTICLE_EMOJIS = ['🌸', '✨', '☁️'] as const;
 
 const PARTICLE_IMAGES = [
-  '/assets/main/bow_1.png',
-  '/assets/main/flower_1.png',
-  '/assets/main/heart_1.png',
-  '/assets/main/moon_1.png',
-  '/assets/main/pearl.png',
-  '/assets/main/pearl_1.png',
-  '/assets/main/pearl_2.png',
-  '/assets/main/seashel_1.png',
-  '/assets/main/seashel_2.png',
-  '/assets/main/star.png',
-  '/assets/main/star_1.png',
-  '/assets/main/star_pearl.png',
-  '/assets/main/tulip_1.png',
-  '/assets/main/silver_1.png',
-  '/assets/main/silver_2.png',
-  '/assets/main/silver_3.png',
-  '/assets/main/silver_4.png',
-  '/assets/main/silver_5.png',
-] as const;
+  'bow_1.png',
+  'flower_1.png',
+  'heart_1.png',
+  'moon_1.png',
+  'pearl.png',
+  'pearl_1.png',
+  'pearl_2.png',
+  'seashel_1.png',
+  'seashel_2.png',
+  'star.png',
+  'star_1.png',
+  'star_pearl.png',
+  'tulip_1.png',
+  'silver_1.png',
+  'silver_2.png',
+  'silver_3.png',
+  'silver_4.png',
+  'silver_5.png',
+].map((file) => `${import.meta.env.BASE_URL}assets/main/${file}`);
 
 function pickFrom<T>(items: readonly T[]): T {
   return items[Math.floor(Math.random() * items.length)] ?? items[0];

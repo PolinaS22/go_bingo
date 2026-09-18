@@ -2,6 +2,8 @@ import clsx from 'clsx';
 import { Camera, Gift, LayoutTemplate, Star } from 'lucide-react';
 import styles from './AppNav.module.scss';
 
+const assetUrl = (file: string): string => `${import.meta.env.BASE_URL}assets/main/${file}`;
+
 export type ShellNavId = 'home' | 'memories';
 
 interface AppNavProps {
@@ -16,7 +18,7 @@ export const AppNav = ({ active, onHome, onMemories }: AppNavProps) => {
       <aside className={styles.sidebar}>
         <button type="button" className={styles.logo} onClick={onHome}>
           <span>BINGO</span>
-          <img src="/assets/main/star_pearl.png" alt="" />
+          <img src={assetUrl('star_pearl.png')} alt="" />
         </button>
 
         <nav className={styles.sideNav} aria-label="Main">
@@ -48,7 +50,7 @@ export const AppNav = ({ active, onHome, onMemories }: AppNavProps) => {
 
         <div className={styles.branding}>
           <div className={styles.pearlWrap}>
-            <img src="/assets/main/pearl.png" alt="" />
+            <img src={assetUrl('pearl.png')} alt="" />
           </div>
           <p>go on adventures that feel like you ♡</p>
         </div>
@@ -72,7 +74,7 @@ export const AppNav = ({ active, onHome, onMemories }: AppNavProps) => {
           <span>Memories</span>
         </button>
         <button type="button" className={styles.pearlButton} onClick={onHome} aria-label="Home">
-          <img src="/assets/main/pearl.png" alt="" />
+          <img src={assetUrl('pearl.png')} alt="" />
         </button>
         <button type="button" className={styles.mobileItem} disabled>
           <Gift size={22} />

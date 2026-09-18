@@ -24,6 +24,8 @@ const DIFFICULTY_LABEL = {
 
 const MAX_BYTES = 10 * 1024 * 1024;
 
+const assetUrl = (file: string): string => `${import.meta.env.BASE_URL}assets/main/${file}`;
+
 export const CompletionModal = ({ cell, onClose, onComplete }: CompletionModalProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -115,11 +117,11 @@ export const CompletionModal = ({ cell, onClose, onComplete }: CompletionModalPr
         transition={{ type: 'spring', stiffness: 380, damping: 28 }}
       >
         <div className={styles.wash} aria-hidden />
-        <img className={styles.decorPearlTop} src="/assets/main/pearl_1.png" alt="" />
-        <img className={styles.decorStar} src="/assets/main/star_1.png" alt="" />
-        <img className={styles.decorPearlSide} src="/assets/main/pearl.png" alt="" />
-        <img className={styles.decorShell} src="/assets/main/seashel_1.png" alt="" />
-        <img className={styles.decorPearlBottom} src="/assets/main/pearl_2.png" alt="" />
+        <img className={styles.decorPearlTop} src={assetUrl('pearl_1.png')} alt="" />
+        <img className={styles.decorStar} src={assetUrl('star_1.png')} alt="" />
+        <img className={styles.decorPearlSide} src={assetUrl('pearl.png')} alt="" />
+        <img className={styles.decorShell} src={assetUrl('seashel_1.png')} alt="" />
+        <img className={styles.decorPearlBottom} src={assetUrl('pearl_2.png')} alt="" />
 
         <button type="button" className={styles.closeButton} onClick={onClose} aria-label="Close">
           <X size={20} strokeWidth={2} />
@@ -131,7 +133,7 @@ export const CompletionModal = ({ cell, onClose, onComplete }: CompletionModalPr
               <span className={styles.heroRing}>
                 <Camera size={28} strokeWidth={1.6} />
               </span>
-              <img className={styles.heroStar} src="/assets/main/star_pearl.png" alt="" />
+              <img className={styles.heroStar} src={assetUrl('star_pearl.png')} alt="" />
             </div>
 
             <h2 id="completion-title" className={styles.title}>
