@@ -1,6 +1,7 @@
 export type Difficulty = 'NORMAL' | 'HARD' | 'GOLDEN';
 export type CellStyle = 'glass' | 'solid' | 'bordered';
 export type GridSize = 2 | 3 | 4 | 5;
+export type RewardMode = 'card' | 'perBingo';
 
 export interface Background {
   type: 'color' | 'gradient' | 'image';
@@ -15,6 +16,19 @@ export interface Reward {
   link?: string;
 }
 
+/** Editor draft for one reward; empty + useRandom fills from the catalog. */
+export interface RewardSlot {
+  title: string;
+  useRandom: boolean;
+}
+
+export interface CardRewards {
+  mode: RewardMode;
+  slots: RewardSlot[];
+  /** Resolved, shuffled rewards (filled on first bingo / card complete). */
+  assigned?: Reward[];
+}
+
 export interface BingoCell {
   id: string;
   title: string;
@@ -22,7 +36,6 @@ export interface BingoCell {
   icon?: string;
   difficulty: Difficulty;
   customBackground?: Background;
-  reward?: Reward;
   completedAt?: number;
   photoId?: string;
   photoRequired: boolean;
@@ -37,6 +50,7 @@ export interface BingoTheme {
   textColor: string;
   borderRadius: number;
   cellStyle: CellStyle;
+  /** Home cover only — not the play-sheet background. */
   globalBackground: Background;
 }
 
@@ -47,6 +61,7 @@ export interface BingoCard {
   size: GridSize;
   cells: BingoCell[];
   theme: BingoTheme;
+  rewards: CardRewards;
   isFrozen: boolean;
   createdAt: number;
   updatedAt: number;

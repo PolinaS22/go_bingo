@@ -1,0 +1,101 @@
+@use '../../styles/tokens' as *;
+
+.stepper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  margin: 0 0 28px;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.line {
+  width: 36px;
+  height: 1px;
+  margin: 0 8px;
+  background: rgba(139, 124, 246, 0.28);
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: $muted-lilac;
+  font-family: $font-ui;
+}
+
+.number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(139, 124, 246, 0.35);
+  background: rgba(255, 255, 255, 0.55);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.label {
+  display: none;
+  font-size: 0.92rem;
+  font-weight: 500;
+}
+
+.current {
+  color: $violet-deep;
+
+  .number {
+    border-color: transparent;
+    background: $violet;
+    color: #fff;
+    box-shadow: 0 6px 16px rgba(123, 100, 210, 0.35);
+  }
+
+  .label {
+    font-weight: 600;
+  }
+}
+
+.done {
+  color: $violet;
+
+  .number {
+    border-color: $violet;
+    background: rgba(139, 124, 246, 0.12);
+    color: $violet-deep;
+  }
+}
+
+@media (min-width: $nav-break) {
+  .stepper {
+    justify-content: flex-start;
+    margin-bottom: 36px;
+  }
+
+  .line {
+    width: 56px;
+    margin: 0 12px;
+  }
+
+  .label {
+    display: inline;
+  }
+
+  .number {
+    width: 32px;
+    height: 32px;
+  }
+}

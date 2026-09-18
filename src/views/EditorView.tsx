@@ -1,75 +1,122 @@
-import { useEffect, useState } from 'react';
-import { Eye, Gift, Palette, Pencil } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { ArrowLeft, Pencil } from 'lucide-react';
+
 import { BingoCardSheet } from '../components/bingo/BingoCardSheet';
+import { CardAppearanceStep } from '../components/editor/CardAppearanceStep';
+import { CardRewardsEditor } from '../components/editor/CardRewardsEditor';
 import { CellSettingsPanel } from '../components/editor/CellSettingsPanel';
-import { PASTEL_COLORS } from '../core/cellPresets';
+import { EditorStep, EditorStepper } from '../components/editor/EditorStepper';
+import { useBingoStore } from '../store/useBingoStore';
+
+import { CARD_THEME_COLORS } from '../core/cardAppearance';
 import {
+  countChallenges,
+  createCells,
   DEFAULT_THEME,
   GRID_SIZES,
-  createCells,
   hasCardProgress,
   isCellCompleted,
   resizeCells,
 } from '../core/defaults';
-import { dealRewardsToCells, fillEmptyRewards } from '../core/rewards';
-import { useBingoStore } from '../store/useBingoStore';
-import { BingoCard, BingoCell, BingoTheme, GridSize } from '../types/bingo';
+import { getHomeCardStatus } from '../core/homeCard';
+import { createDefaultRewards, createRewardSlot, maxBingoLines } from '../core/rewards';
+import {
+  Background,
+  BingoCard,
+  BingoCell,
+  BingoTheme,
+  CardRewards,
+  GridSize,
+} from '../types/bingo';
+
 import styles from './EditorView.module.scss';
 
 interface EditorViewProps {
   onSave: () => void;
+  onBack: () => void;
   cardId: string | null;
 }
 
-export const EditorView = ({ onSave, cardId }: EditorViewProps) => {
+const INITIAL_THEME: BingoTheme = {
+  ...DEFAULT_THEME,
+  primaryColor: CARD_THEME_COLORS[0],
+  globalBackground: { type: 'color', value: CARD_THEME_COLORS[0] },
+};
+
+const STATUS_LABEL = {
+  active: 'Active',
+  draft: 'Draft',
+  completed: 'Completed',
+} as const;
+
+function clampRewardsToSize(rewards: CardRewards, size: GridSize): CardRewards {
+  if (rewards.mode === 'card') {
+    return {
+      mode: 'card',
+      slots: [rewards.slots[0] ?? createRewardSlot()],
+    };
+  }
+
+  const max = maxBingoLines(size);
+  return {
+    mode: 'perBingo',
+    slots: rewards.slots.slice(0, max),
+  };
+}
+
+export const EditorView = ({ onSave, onBack, cardId }: EditorViewProps) => {
   const { addCard, updateCard, cards } = useBingoStore();
   const existing = cardId ? (cards.find((card) => card.id === cardId) ?? null) : null;
+  const draftIdRef = useRef(crypto.randomUUID());
 
+  const [step, setStep] = useState<EditorStep>(1);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [size, setSize] = useState<GridSize>(5);
   const [cells, setCells] = useState<BingoCell[]>(() => createCells(5));
-  const [theme, setTheme] = useState<BingoTheme>(DEFAULT_THEME);
+  const [theme, setTheme] = useState<BingoTheme>(INITIAL_THEME);
+  const [rewards, setRewards] = useState<CardRewards>(() => createDefaultRewards('card'));
   const [selectedCellId, setSelectedCellId] = useState<string | null>(null);
-  const [isPreview, setIsPreview] = useState(false);
-  const [themeOpen, setThemeOpen] = useState(false);
 
   const playStarted = existing?.isFrozen === true || hasCardProgress(cells);
-  const canSave = title.trim().length > 0 && cells.length === size * size;
+  const canContinue = title.trim().length > 0;
+  const canSave = canContinue && cells.length === size * size;
 
   useEffect(() => {
+    setStep(1);
+    setSelectedCellId(null);
+
     if (!cardId) {
+      draftIdRef.current = crypto.randomUUID();
       setTitle('');
       setDescription('');
       setSize(5);
       setCells(createCells(5));
-      setTheme(DEFAULT_THEME);
-      setSelectedCellId(null);
-      setIsPreview(false);
-      setThemeOpen(false);
+      setTheme(INITIAL_THEME);
+      setRewards(createDefaultRewards('card'));
       return;
     }
 
-    if (!existing) {
+    const card = useBingoStore.getState().cards.find((item) => item.id === cardId);
+    if (!card) {
       return;
     }
 
-    setTitle(existing.title);
-    setDescription(existing.description ?? '');
-    setSize(existing.size);
-    setCells(existing.cells);
-    setTheme(existing.theme);
-    setSelectedCellId(null);
-    setIsPreview(false);
-    setThemeOpen(false);
-  }, [cardId, existing]);
+    setTitle(card.title);
+    setDescription(card.description ?? '');
+    setSize(card.size);
+    setCells(card.cells);
+    setTheme(card.theme);
+    setRewards(clampRewardsToSize(card.rewards, card.size));
+  }, [cardId]);
 
   const persistExisting = (
     nextCells: BingoCell[],
     nextTheme: BingoTheme,
     nextTitle: string,
     nextDescription: string,
-    nextSize: GridSize
+    nextSize: GridSize,
+    nextRewards: CardRewards
   ) => {
     if (!existing) {
       return;
@@ -82,6 +129,7 @@ export const EditorView = ({ onSave, cardId }: EditorViewProps) => {
       size: nextSize,
       cells: nextCells.map((cell, position) => ({ ...cell, position })),
       theme: nextTheme,
+      rewards: clampRewardsToSize(nextRewards, nextSize),
       updatedAt: Date.now(),
     });
   };
@@ -91,38 +139,52 @@ export const EditorView = ({ onSave, cardId }: EditorViewProps) => {
       return;
     }
 
+    const nextCells = resizeCells(cells, nextSize);
+    const nextRewards = clampRewardsToSize(rewards, nextSize);
     setSize(nextSize);
-    setCells((prev) => resizeCells(prev, nextSize));
+    setCells(nextCells);
+    setRewards(nextRewards);
+    persistExisting(nextCells, theme, title, description, nextSize, nextRewards);
     setSelectedCellId(null);
   };
 
   const handleCellChange = (updatedCell: BingoCell) => {
     setCells((prev) => {
       const next = prev.map((cell) => (cell.id === updatedCell.id ? updatedCell : cell));
-      persistExisting(next, theme, title, description, size);
+      persistExisting(next, theme, title, description, size, rewards);
       return next;
     });
+  };
+
+  const applyTheme = (next: BingoTheme) => {
+    setTheme(next);
+    persistExisting(cells, next, title, description, size, rewards);
   };
 
   const handleThemeColor = (color: string) => {
-    setTheme((prev) => {
-      const next = {
-        ...prev,
-        primaryColor: color,
-        globalBackground: { type: 'color' as const, value: color },
-      };
-      persistExisting(cells, next, title, description, size);
-      return next;
+    applyTheme({
+      ...theme,
+      primaryColor: color,
+      globalBackground:
+        theme.globalBackground.type === 'image'
+          ? theme.globalBackground
+          : { type: 'color', value: color },
     });
   };
 
-  const handleFillRewards = () => {
-    setCells((prev) => {
-      const hasEmpty = prev.some((cell) => !cell.reward?.title.trim());
-      const next = playStarted || hasEmpty ? fillEmptyRewards(prev) : dealRewardsToCells(prev);
-      persistExisting(next, theme, title, description, size);
-      return next;
-    });
+  const handleCoverChange = (background: Background) => {
+    applyTheme({ ...theme, globalBackground: background });
+  };
+
+  const handleTitleChange = (value: string) => {
+    setTitle(value);
+    persistExisting(cells, theme, value, description, size, rewards);
+  };
+
+  const handleRewardsChange = (next: CardRewards) => {
+    const clamped = clampRewardsToSize(next, size);
+    setRewards(clamped);
+    persistExisting(cells, theme, title, description, size, clamped);
   };
 
   const handleSave = () => {
@@ -130,10 +192,13 @@ export const EditorView = ({ onSave, cardId }: EditorViewProps) => {
       return;
     }
 
-    const normalizedCells = fillEmptyRewards(
-      cells.map((cell, position) => ({ ...cell, position }))
-    );
+    const normalizedCells = cells.map((cell, position) => ({
+      ...cell,
+      position,
+      photoRequired: cell.difficulty === 'GOLDEN' ? true : cell.photoRequired,
+    }));
     const now = Date.now();
+    const nextRewards = clampRewardsToSize(rewards, size);
 
     if (existing) {
       const updated: BingoCard = {
@@ -143,6 +208,7 @@ export const EditorView = ({ onSave, cardId }: EditorViewProps) => {
         size,
         cells: normalizedCells,
         theme,
+        rewards: nextRewards,
         updatedAt: now,
       };
       updateCard(updated);
@@ -154,6 +220,7 @@ export const EditorView = ({ onSave, cardId }: EditorViewProps) => {
         size,
         cells: normalizedCells,
         theme,
+        rewards: nextRewards,
         isFrozen: false,
         createdAt: now,
         updatedAt: now,
@@ -164,135 +231,183 @@ export const EditorView = ({ onSave, cardId }: EditorViewProps) => {
     onSave();
   };
 
+  const goToBingoStep = () => {
+    if (!canContinue) {
+      return;
+    }
+    setStep(2);
+  };
+
+  const handleStepSelect = (next: EditorStep) => {
+    if (next === 2 && !canContinue) {
+      return;
+    }
+    setSelectedCellId(null);
+    setStep(next);
+  };
+
+  const handleHeaderBack = () => {
+    if (step === 2) {
+      setSelectedCellId(null);
+      setStep(1);
+      return;
+    }
+    onBack();
+  };
+
   const selectedCell = cells.find((cell) => cell.id === selectedCellId);
   const selectedLocked = selectedCell ? isCellCompleted(selectedCell.completedAt) : false;
-  const pageTitle = existing ? 'Edit Bingo Card' : 'Create New Bingo Card';
+  const isEditing = existing !== null;
+  const pageTitle = isEditing ? 'Edit Bingo' : 'Create New Bingo';
+  const challengeCount = countChallenges(cells);
+
+  const previewCard: BingoCard = {
+    id: existing?.id ?? draftIdRef.current,
+    title: title.trim() || 'Your Bingo',
+    description: description.trim() || undefined,
+    size,
+    cells,
+    theme,
+    rewards,
+    isFrozen: existing?.isFrozen ?? false,
+    createdAt: existing?.createdAt ?? 0,
+    updatedAt: existing?.updatedAt ?? 0,
+    completedAt: existing?.completedAt,
+  };
+
+  const status = getHomeCardStatus(previewCard);
+  const challengeLabel = challengeCount === 1 ? 'challenge' : 'challenges';
 
   return (
     <div className={`${styles.editorContainer} ${selectedCell ? styles.panelOpen : ''}`}>
       <div className={styles.mainContent}>
-        <h1>{pageTitle}</h1>
-
-        {playStarted && (
-          <p className={styles.frozenNotice}>
-            Play has started. Completed cells stay as they are. Theme and open challenges can still change.
-          </p>
-        )}
-
-        {!isPreview && (
-          <div className={styles.topControls}>
-            <div className={styles.formGroup}>
-              <label htmlFor="title">Title</label>
-              <input
-                id="title"
-                type="text"
-                value={title}
-                onChange={(event) => setTitle(event.target.value)}
-                placeholder="Japan Adventure"
-              />
-            </div>
-            <div className={styles.formGroup}>
-              <label htmlFor="description">Description</label>
-              <input
-                id="description"
-                type="text"
-                value={description}
-                onChange={(event) => setDescription(event.target.value)}
-                placeholder="Optional description"
-              />
-            </div>
-            <fieldset className={styles.sizeGroup}>
-              <legend>Grid Size</legend>
-              <div className={styles.sizeButtons}>
-                {GRID_SIZES.map((gridSize) => (
-                  <button
-                    type="button"
-                    key={gridSize}
-                    className={size === gridSize ? styles.sizeActive : undefined}
-                    aria-pressed={size === gridSize}
-                    onClick={() => handleSizeChange(gridSize)}
-                    disabled={playStarted}
-                  >
-                    {gridSize}x{gridSize}
-                  </button>
-                ))}
-              </div>
-            </fieldset>
+        <header className={styles.header}>
+          <button
+            type="button"
+            className={styles.backButton}
+            aria-label="Back"
+            onClick={handleHeaderBack}
+          >
+            <ArrowLeft size={20} />
+          </button>
+          <div className={styles.heading}>
+            {step === 1 ? (
+              <>
+                <h1>
+                  {pageTitle}
+                  <span className={styles.titleSparkle} aria-hidden="true" />
+                </h1>
+                <p>{isEditing ? 'tweak the look of this card' : "let's build your next adventure"}</p>
+              </>
+            ) : (
+              <>
+                <h1 className={styles.mobilePageTitle}>
+                  {pageTitle}
+                  <span className={styles.titleSparkle} aria-hidden="true" />
+                </h1>
+                <label className={styles.inlineTitle} htmlFor="bingo-title">
+                  <input
+                    id="bingo-title"
+                    type="text"
+                    value={title}
+                    onChange={(event) => handleTitleChange(event.target.value)}
+                    placeholder="Japan Adventure"
+                    aria-label="Card title"
+                  />
+                  <Pencil size={16} aria-hidden />
+                </label>
+                <p>
+                  {STATUS_LABEL[status]} • {challengeCount} {challengeLabel}
+                </p>
+              </>
+            )}
           </div>
-        )}
+        </header>
 
-        <BingoCardSheet
-          title={title}
-          size={size}
-          cells={cells}
-          createdAt={existing?.createdAt}
-          selectedCellId={selectedCellId}
-          onCellClick={(cellId) => {
-            if (!isPreview) {
-              setSelectedCellId(cellId);
-            }
-          }}
-          accentColor={theme.primaryColor}
-          paperColor={theme.backgroundColor}
-        />
+        <EditorStepper step={step} onStepSelect={handleStepSelect} />
 
-        {themeOpen && (
-          <div className={styles.themePanel} role="group" aria-label="Theme colors">
-            {PASTEL_COLORS.map((color) => (
+        {step === 1 ? (
+          <>
+            <CardAppearanceStep
+              title={title}
+              theme={theme}
+              previewCard={previewCard}
+              onTitleChange={handleTitleChange}
+              onCoverChange={handleCoverChange}
+              onColorChange={handleThemeColor}
+            />
+            <div className={styles.continueRow}>
               <button
                 type="button"
-                key={color}
-                className={theme.primaryColor === color ? styles.themeActive : undefined}
-                style={{ backgroundColor: color }}
-                aria-label={`Theme color ${color}`}
-                onClick={() => handleThemeColor(color)}
-              />
-            ))}
-          </div>
-        )}
+                className={styles.continueButton}
+                onClick={goToBingoStep}
+                disabled={!canContinue}
+              >
+                Continue
+                <span aria-hidden="true">→</span>
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            {playStarted && (
+              <p className={styles.frozenNotice}>
+                Play has started. Completed cells stay as they are. Theme and open challenges can still
+                change.
+              </p>
+            )}
 
-        <div className={styles.actions}>
-          <button
-            type="button"
-            className={styles.ghostButton}
-            onClick={() => {
-              setThemeOpen((open) => !open);
-              setIsPreview(false);
-            }}
-          >
-            <Palette size={16} />
-            Theme
-          </button>
-          <button
-            type="button"
-            className={styles.ghostButton}
-            onClick={handleFillRewards}
-          >
-            <Gift size={16} />
-            Fill Rewards
-          </button>
-          <button
-            type="button"
-            className={styles.ghostButton}
-            onClick={() => {
-              setIsPreview((open) => !open);
-              setThemeOpen(false);
-              setSelectedCellId(null);
-            }}
-          >
-            <Eye size={16} />
-            {isPreview ? 'Edit' : 'Preview'}
-          </button>
-          <button
-            type="button"
-            className={styles.saveButton}
-            onClick={handleSave}
-            disabled={!canSave}
-          >
-            <Pencil size={16} />
-            {existing ? 'Save Changes' : 'Save Bingo Card'}
-          </button>
-        </div>
+            <p className={styles.editHint}>
+              <span className={styles.hintDesktop}>click a cell to edit</span>
+              <span className={styles.hintMobile}>tap a cell to edit</span>
+            </p>
+
+            <BingoCardSheet
+              card={previewCard}
+              selectedCellId={selectedCellId}
+              onCellClick={setSelectedCellId}
+              variant="edit"
+            />
+
+            <div className={styles.bingoMeta}>
+              <fieldset className={styles.sizeGroup}>
+                <legend>Grid Size</legend>
+                <div className={styles.sizeButtons}>
+                  {GRID_SIZES.map((gridSize) => (
+                    <button
+                      type="button"
+                      key={gridSize}
+                      className={size === gridSize ? styles.sizeActive : undefined}
+                      aria-pressed={size === gridSize}
+                      onClick={() => handleSizeChange(gridSize)}
+                      disabled={playStarted}
+                    >
+                      {gridSize}x{gridSize}
+                    </button>
+                  ))}
+                </div>
+              </fieldset>
+
+              <CardRewardsEditor
+                size={size}
+                rewards={rewards}
+                onChange={handleRewardsChange}
+                disabled={playStarted}
+              />
+            </div>
+
+            <div className={styles.actions}>
+              <button
+                type="button"
+                className={styles.saveButton}
+                onClick={handleSave}
+                disabled={!canSave}
+              >
+                {existing ? 'Save Changes' : 'Save Bingo Card'}
+              </button>
+            </div>
+          </>
+        )}
       </div>
 
       {selectedCell && (

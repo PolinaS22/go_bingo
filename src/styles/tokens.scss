@@ -1,10 +1,29 @@
-$cottage-rose: #FFD1DC;
-$vintage-sage: #B2AC88;
-$lavender-blush: #FFF0F5;
-$bubblegum-pink: #FF69B4;
+$cottage-rose: #ffbaca;
+$vintage-sage: #ffd900;
+$lavender-blush: #fec8da;
+$bubblegum-pink: #fa2d94;
 $deep-mocha: #4A3728;
 $glass-bg: rgba(255, 255, 255, 0.65);
 $card-shadow: 0 20px 50px rgba(255, 182, 193, 0.25);
+
+// Dreamy home / shell
+$mist: #f6f3fb;
+$lilac-wash: #ebe4f7;
+$lilac-deep: #c9b8e8;
+$ink-soft: #3d3550;
+$muted-lilac: #8b7fa8;
+$violet: #8b7cf6;
+$violet-deep: #6f63e8;
+$glass: rgba(255, 255, 255, 0.72);
+$card-radius: 28px;
+$sidebar-width: 272px;
+$nav-break: 960px;
+$font-display: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+$font-ui: 'Outfit', 'Quicksand', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+
+$badge-active: #8b7cf6;
+$badge-draft: #c4a574;
+$badge-completed: #6eaa90;
 
 // Keep legacy for compat or rename them later
 $cream: #f7f1e8;
@@ -13,7 +32,7 @@ $ink: $deep-mocha;
 $ink-dark: #3d2914;
 $muted: #8a6a60;
 $gold: #e8b86d;
-$stamp-blue: #6b9ecf;
+$stamp-blue: #4fa0ec;
 $tape: rgba(122, 168, 196, 0.55);
 $border: #e4d6c8;
 $radius: 24px;

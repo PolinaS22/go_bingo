@@ -1,0 +1,226 @@
+@use '../../styles/tokens' as *;
+
+.sidebar {
+  display: none;
+}
+
+.mobileNav {
+  position: fixed;
+  z-index: 120;
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  height: 72px;
+  // display: grid;
+  // grid-template-columns: 1fr 1fr 72px 1fr 1fr;
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+
+  padding: 8px 10px 10px;
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(18px);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 28px;
+  box-shadow: 0 16px 40px rgba(140, 120, 180, 0.18);
+}
+
+.mobileItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 6px 0 4px;
+  border: none;
+  background: none;
+  color: $muted-lilac;
+  font-family: $font-ui;
+  font-size: 0.68rem;
+  font-weight: 500;
+  cursor: pointer;
+
+  &:disabled {
+    color: $muted-lilac;
+    cursor: default;
+    opacity: 1;
+  }
+}
+
+.mobileItemActive {
+  color: $violet-deep;
+  font-weight: 600;
+}
+
+.pearlButton {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  // margin: 0 auto 10px;
+  border: none;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 30%, #fff 0%, #efe7fb 70%);
+  box-shadow:
+    0 0 0 8px rgba(155, 130, 230, 0.16),
+    0 10px 24px rgba(123, 100, 210, 0.28);
+  cursor: pointer;
+
+  img {
+    width: 42px;
+    height: 42px;
+    object-fit: contain;
+  }
+}
+
+.logo,
+.sideItem,
+.branding,
+.pearlWrap {
+  display: none;
+}
+
+@media (min-width: $nav-break) {
+  .mobileNav {
+    display: none;
+  }
+
+  .sidebar {
+    position: fixed;
+    z-index: 80;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: $sidebar-width;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    padding: 28px 22px 24px;
+    background:
+      radial-gradient(ellipse at 20% 0%, rgba(255, 255, 255, 0.7) 0%, transparent 46%),
+      radial-gradient(ellipse at 80% 90%, rgba(200, 180, 240, 0.35) 0%, transparent 50%),
+      linear-gradient(180deg, #f3eefb 0%, #ece6f7 55%, #e7e0f4 100%);
+    overflow: hidden;
+
+    &::before,
+    &::after {
+      content: '';
+      position: absolute;
+      pointer-events: none;
+      background: url('/assets/main/star_pearl.png') no-repeat center / contain;
+      opacity: 0.45;
+    }
+
+    &::before {
+      width: 22px;
+      height: 22px;
+      top: 18%;
+      right: 28px;
+    }
+
+    &::after {
+      width: 16px;
+      height: 16px;
+      top: 58%;
+      left: 24px;
+      opacity: 0.3;
+    }
+  }
+
+  .logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-family: $font-display;
+    font-size: 1.85rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: $ink-soft;
+
+    img {
+      width: 22px;
+      height: 22px;
+      object-fit: contain;
+    }
+  }
+
+  .sideNav {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 40px;
+  }
+
+  .sideItem {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 12px 16px;
+    border: none;
+    border-radius: 999px;
+    background: transparent;
+    color: $muted-lilac;
+    font-family: $font-ui;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.25s ease, color 0.25s ease;
+
+    &:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.45);
+      color: $ink-soft;
+    }
+
+    &:disabled {
+      color: $muted-lilac;
+      cursor: default;
+      opacity: 1;
+    }
+  }
+
+  .sideItemActive {
+    background: rgba(255, 255, 255, 0.88);
+    color: $violet-deep;
+    box-shadow: 0 8px 20px rgba(140, 120, 190, 0.12);
+    font-weight: 600;
+  }
+
+  .branding {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    margin-top: auto;
+    text-align: center;
+
+    p {
+      margin: 0;
+      max-width: 180px;
+      font-family: $font-display;
+      font-size: 0.95rem;
+      font-style: italic;
+      line-height: 1.35;
+      color: $muted-lilac;
+    }
+  }
+
+  .pearlWrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 128px;
+    height: 128px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.8) 0%, rgba(210, 190, 245, 0.15) 70%);
+
+    img {
+      width: 92px;
+      height: 92px;
+      object-fit: contain;
+      filter: drop-shadow(0 10px 18px rgba(140, 120, 200, 0.25));
+    }
+  }
+}

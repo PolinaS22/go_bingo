@@ -1,0 +1,163 @@
+@use '../../styles/tokens.scss' as *;
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.head {
+  h3 {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    font-size: 0.82rem;
+    font-weight: 650;
+    color: $ink-soft;
+  }
+
+  p {
+    margin: 4px 0 0;
+    font-family: $font-ui;
+    font-size: 0.78rem;
+    color: $muted-lilac;
+  }
+}
+
+.modes {
+  display: flex;
+  gap: 0.5rem;
+
+  button {
+    flex: 1;
+    padding: 0.65rem 0.4rem;
+    border: 1px solid rgba(201, 184, 232, 0.5);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.9);
+    color: $muted-lilac;
+    font-size: 0.8rem;
+    font-weight: 650;
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+      border-color: $violet;
+      color: $ink-soft;
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.modeActive {
+  background: rgba(139, 124, 246, 0.12) !important;
+  border-color: $violet !important;
+  color: $violet-deep !important;
+}
+
+.slots {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.slot {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.slotRow {
+  display: flex;
+  gap: 0.4rem;
+
+  input {
+    flex: 1;
+    min-width: 0;
+    padding: 0.75rem 0.9rem;
+    border: 1px solid rgba(201, 184, 232, 0.55);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.9);
+    color: $ink-soft;
+    font-size: 0.9rem;
+
+    &:focus {
+      outline: none;
+      border-color: $violet;
+      box-shadow: 0 0 0 3px rgba(139, 124, 246, 0.16);
+    }
+
+    &:disabled {
+      opacity: 0.7;
+      background: rgba(245, 240, 255, 0.7);
+    }
+  }
+}
+
+.iconButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  flex-shrink: 0;
+  border: 1px solid rgba(201, 184, 232, 0.45);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.9);
+  color: $muted-lilac;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    color: #b42318;
+    border-color: rgba(180, 35, 24, 0.35);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.random {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: $font-ui;
+  font-size: 0.75rem;
+  color: $muted-lilac;
+  cursor: pointer;
+
+  input {
+    accent-color: $violet;
+  }
+}
+
+.add {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  align-self: flex-start;
+  padding: 0.55rem 0.85rem;
+  border: 1px dashed rgba(139, 124, 246, 0.45);
+  border-radius: 12px;
+  background: transparent;
+  color: $violet-deep;
+  font-size: 0.8rem;
+  font-weight: 650;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: rgba(139, 124, 246, 0.08);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}

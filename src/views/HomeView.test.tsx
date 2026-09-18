@@ -1,9 +1,11 @@
-import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
+import { fireEvent,render, screen } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
+
 import { HomeView } from './HomeView';
 import { useBingoStore } from '../store/useBingoStore';
-import { mockBingoState } from '../test/mockBingoStore';
+
 import { makeCard } from '../test/fixtures';
+import { mockBingoState } from '../test/mockBingoStore';
 
 vi.mock('../store/useBingoStore');
 
@@ -17,7 +19,7 @@ describe('HomeView', () => {
       <HomeView onCreateNew={vi.fn()} onPlay={vi.fn()} onEdit={vi.fn()} />
     );
 
-    expect(screen.getByText(/My Bingo Cards/i)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /My Bingos/i })).toBeInTheDocument();
     expect(screen.getByText(/No bingo cards yet/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Create New Bingo/i })).toBeInTheDocument();
   });
@@ -40,6 +42,42 @@ describe('HomeView', () => {
     expect(screen.getByText('Test Bingo 2')).toBeInTheDocument();
   });
 
+  it('edits a card from the home menu after play has started', () => {
+    const onEdit = vi.fn();
+    mockedUseBingoStore.mockReturnValue(
+      mockBingoState({
+        cards: [makeCard({ id: '1', title: 'Japan Adventure', isFrozen: true })],
+      })
+    );
+
+    render(
+      <HomeView onCreateNew={vi.fn()} onPlay={vi.fn()} onEdit={onEdit} />
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Actions for Japan Adventure' }));
+    fireEvent.click(screen.getByRole('menuitem', { name: /Edit look/i }));
+    expect(onEdit).toHaveBeenCalledWith('1');
+  });
+
+  it('deletes a card from the home menu', () => {
+    const deleteCard = vi.fn();
+    mockedUseBingoStore.mockReturnValue(
+      mockBingoState({
+        cards: [makeCard({ id: '1', title: 'Japan Adventure' })],
+        deleteCard,
+      })
+    );
+
+    render(
+      <HomeView onCreateNew={vi.fn()} onPlay={vi.fn()} onEdit={vi.fn()} />
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Actions for Japan Adventure' }));
+    fireEvent.click(screen.getByRole('menuitem', { name: /^Delete$/i }));
+    fireEvent.click(screen.getByRole('menuitem', { name: /Delete forever/i }));
+    expect(deleteCard).toHaveBeenCalledWith('1');
+  });
+
   it('selects a card and starts play', () => {
     const setCurrentCard = vi.fn();
     const onPlay = vi.fn();
@@ -54,7 +92,7 @@ describe('HomeView', () => {
       <HomeView onCreateNew={vi.fn()} onPlay={onPlay} onEdit={vi.fn()} />
     );
 
-    fireEvent.click(screen.getByRole('button', { name: /Test Bingo 1/i }));
+    fireEvent.click(screen.getByRole('button', { name: 'Test Bingo 1' }));
     expect(setCurrentCard).toHaveBeenCalledWith('1');
     expect(onPlay).toHaveBeenCalled();
   });

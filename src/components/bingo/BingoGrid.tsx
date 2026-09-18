@@ -1,7 +1,8 @@
-import type { CSSProperties } from 'react';
+import { BingoCell, BingoCellVariant } from './BingoCell';
+
 import { BingoLine } from '../../core/engine';
 import { BingoCell as BingoCellType, GridSize } from '../../types/bingo';
-import { BingoCell } from './BingoCell';
+
 import styles from './BingoGrid.module.scss';
 
 interface BingoGridProps {
@@ -10,44 +11,26 @@ interface BingoGridProps {
   onCellClick: (cellId: string) => void;
   completedLines?: BingoLine[];
   selectedCellId?: string | null;
+  variant?: BingoCellVariant;
 }
 
-function stampStyle(line: BingoLine, size: number): CSSProperties {
-  const unit = 100 / size;
+function lineCoords(line: BingoLine, size: number): { x1: number; y1: number; x2: number; y2: number } {
+  const inset = 10;
+  const mid = (index: number) => ((index + 0.5) / size) * 100;
 
   if (line.kind === 'row') {
-    return {
-      top: `${line.index * unit + unit / 2}%`,
-      left: '5%',
-      width: '90%',
-      transform: 'translateY(-50%) rotate(-6deg)',
-    };
+    return { x1: inset, y1: mid(line.index), x2: 100 - inset, y2: mid(line.index) };
   }
 
   if (line.kind === 'column') {
-    return {
-      top: '50%',
-      left: `${line.index * unit + unit / 2}%`,
-      width: '90%',
-      transform: 'translate(-50%, -50%) rotate(84deg)',
-    };
+    return { x1: mid(line.index), y1: inset, x2: mid(line.index), y2: 100 - inset };
   }
 
   if (line.kind === 'diagonal') {
-    return {
-      top: '50%',
-      left: '8%',
-      width: '84%',
-      transform: 'translateY(-50%) rotate(45deg)',
-    };
+    return { x1: inset, y1: inset, x2: 100 - inset, y2: 100 - inset };
   }
 
-  return {
-    top: '50%',
-    left: '8%',
-    width: '84%',
-    transform: 'translateY(-50%) rotate(-45deg)',
-  };
+  return { x1: 100 - inset, y1: inset, x2: inset, y2: 100 - inset };
 }
 
 export const BingoGrid = ({
@@ -56,6 +39,7 @@ export const BingoGrid = ({
   onCellClick,
   completedLines = [],
   selectedCellId = null,
+  variant = 'play',
 }: BingoGridProps) => {
   return (
     <div className={styles.wrap}>
@@ -69,19 +53,23 @@ export const BingoGrid = ({
             cell={cell}
             onClick={onCellClick}
             selected={selectedCellId === cell.id}
+            variant={variant}
           />
         ))}
       </div>
-      {completedLines.map((line) => (
-        <div
-          key={line.id}
-          className={styles.lineStamp}
-          style={stampStyle(line, size)}
-          aria-hidden
-        >
-          Bingo!
-        </div>
-      ))}
+      {completedLines.length > 0 ? (
+        <svg className={styles.lines} viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden>
+          {completedLines.map((line) => {
+            const coords = lineCoords(line, size);
+            return (
+              <g key={line.id}>
+                <line className={styles.lineGlow} {...coords} />
+                <line className={styles.line} {...coords} />
+              </g>
+            );
+          })}
+        </svg>
+      ) : null}
     </div>
   );
 };

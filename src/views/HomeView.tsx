@@ -1,6 +1,8 @@
-import { useBingoStore } from '../store/useBingoStore';
-import { hasCardProgress, isCellCompleted } from '../core/defaults';
+import { useCallback, useState } from 'react';
+import { Plus } from 'lucide-react';
+import { BingoPreviewCard, CreateBingoCard } from '../components/home/BingoPreviewCard';
 import { deletePhoto } from '../services/storage';
+import { useBingoStore } from '../store/useBingoStore';
 import styles from './HomeView.module.scss';
 
 interface HomeViewProps {
@@ -11,6 +13,8 @@ interface HomeViewProps {
 
 export const HomeView = ({ onCreateNew, onPlay, onEdit }: HomeViewProps) => {
   const { cards, setCurrentCard, deleteCard, resetCard } = useBingoStore();
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const closeMenu = useCallback(() => setOpenMenuId(null), []);
 
   const handlePlay = (cardId: string) => {
     setCurrentCard(cardId);
@@ -45,76 +49,58 @@ export const HomeView = ({ onCreateNew, onPlay, onEdit }: HomeViewProps) => {
     await Promise.all(photoIds.map((photoId) => deletePhoto(photoId)));
   };
 
+  const bingoLabel = cards.length === 1 ? 'bingo' : 'bingos';
+
   return (
     <div className={styles.container}>
-      <h1>My Bingo Cards</h1>
+      <header className={styles.header}>
+        <div>
+          <h1 className={styles.title}>
+            My Bingos
+            <span className={styles.titleSparkle} aria-hidden="true" />
+          </h1>
+          <p className={styles.count}>
+            {cards.length} {bingoLabel}
+          </p>
+        </div>
+
+        <button type="button" className={styles.newButton} onClick={onCreateNew}>
+          <Plus size={16} strokeWidth={2.4} />
+          <span>New Bingo</span>
+        </button>
+      </header>
 
       {cards.length === 0 ? (
-        <div className={styles.emptyState}>
-          <p>No bingo cards yet. Create one to start playing!</p>
-          <button type="button" className={styles.createButton} onClick={onCreateNew}>
-            Create New Bingo
-          </button>
-        </div>
-      ) : (
-        <div className={styles.cardList}>
-          {cards.map((card) => {
-            const completedCount = card.cells.filter((cell) =>
-              isCellCompleted(cell.completedAt)
-            ).length;
+        <p className={styles.emptyHint}>No bingo cards yet. Create one to start playing!</p>
+      ) : null}
 
-            return (
-              <div key={card.id} className={styles.cardItem}>
-                <div className={styles.cardHeader}>
-                  <button
-                    type="button"
-                    className={styles.cardMain}
-                    onClick={() => handlePlay(card.id)}
-                  >
-                    <h3>{card.title}</h3>
-                    <p>
-                      {completedCount}/{card.cells.length} completed
-                    </p>
-                    {card.isFrozen && <span className={styles.frozenBadge}>In play</span>}
-                  </button>
-                  <div className={styles.cardActions}>
-                    <button
-                      type="button"
-                      className={styles.iconButton}
-                      onClick={() => onEdit(card.id)}
-                    >
-                      {card.isFrozen ? 'View' : 'Edit'}
-                    </button>
-                    {hasCardProgress(card.cells) && (
-                      <button
-                        type="button"
-                        className={styles.iconButton}
-                        onClick={() => {
-                          void handleReset(card.id);
-                        }}
-                      >
-                        Reset
-                      </button>
-                    )}
-                    <button
-                      type="button"
-                      className={styles.iconButtonDanger}
-                      onClick={() => {
-                        void handleDelete(card.id);
-                      }}
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-          <button type="button" className={styles.createButton} onClick={onCreateNew}>
-            Create New Bingo
-          </button>
-        </div>
-      )}
+      <div className={styles.grid}>
+        {cards.map((card) => (
+          <BingoPreviewCard
+            key={card.id}
+            card={card}
+            menuOpen={openMenuId === card.id}
+            onPlay={() => handlePlay(card.id)}
+            onEdit={() => {
+              closeMenu();
+              onEdit(card.id);
+            }}
+            onReset={() => {
+              closeMenu();
+              void handleReset(card.id);
+            }}
+            onDelete={() => {
+              closeMenu();
+              void handleDelete(card.id);
+            }}
+            onToggleMenu={() =>
+              setOpenMenuId((current) => (current === card.id ? null : card.id))
+            }
+            onCloseMenu={closeMenu}
+          />
+        ))}
+        <CreateBingoCard onCreate={onCreateNew} />
+      </div>
     </div>
   );
 };

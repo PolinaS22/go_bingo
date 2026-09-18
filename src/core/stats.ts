@@ -1,5 +1,5 @@
 import { BingoCard } from '../types/bingo';
-import { isCellCompleted } from './defaults';
+import { isCellCompleted, isEmptyCell } from './defaults';
 import { getBingoLines } from './engine';
 
 export interface CardStats {
@@ -11,7 +11,7 @@ export interface CardStats {
 }
 
 export function getCardStats(card: BingoCard): CardStats {
-  const playable = card.cells;
+  const playable = card.cells.filter((cell) => !isEmptyCell(cell));
   const completed = playable.filter((cell) => isCellCompleted(cell.completedAt));
 
   return {

@@ -3,13 +3,17 @@ import {
   BingoCard,
   BingoCell,
   BingoTheme,
+  CardRewards,
   CellStyle,
   Difficulty,
   GridSize,
   PersistedBingoState,
   Reward,
+  RewardMode,
+  RewardSlot,
 } from '../types/bingo';
-import { DEFAULT_THEME, createCell, isGridSize } from './defaults';
+import { createCell, DEFAULT_THEME, isGridSize } from './defaults';
+import { createDefaultRewards, createRewardSlot, maxBingoLines } from './rewards';
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -73,6 +77,61 @@ function normalizeReward(value: unknown): Reward | undefined {
   };
 }
 
+function normalizeRewardSlot(value: unknown): RewardSlot | undefined {
+  if (!isRecord(value)) {
+    return undefined;
+  }
+
+  const title = typeof value.title === 'string' ? value.title : '';
+  const useRandom =
+    value.useRandom === true || (value.useRandom !== false && title.trim().length === 0);
+
+  return { title, useRandom };
+}
+
+function normalizeRewardMode(value: unknown): RewardMode {
+  return value === 'perBingo' ? 'perBingo' : 'card';
+}
+
+function normalizeCardRewards(
+  raw: Record<string, unknown>,
+  size: GridSize,
+  liftedReward: Reward | undefined
+): CardRewards {
+  if (isRecord(raw.rewards)) {
+    const mode = normalizeRewardMode(raw.rewards.mode);
+    const maxSlots = mode === 'card' ? 1 : maxBingoLines(size);
+    const rawSlots = Array.isArray(raw.rewards.slots) ? raw.rewards.slots : [];
+    const slots = rawSlots
+      .map(normalizeRewardSlot)
+      .filter((slot): slot is RewardSlot => slot !== undefined)
+      .slice(0, maxSlots);
+
+    const assigned = Array.isArray(raw.rewards.assigned)
+      ? raw.rewards.assigned
+          .map(normalizeReward)
+          .filter((reward): reward is Reward => reward !== undefined)
+      : undefined;
+
+    return {
+      mode,
+      slots: slots.length > 0 ? slots : [createRewardSlot()],
+      assigned: assigned && assigned.length > 0 ? assigned : undefined,
+    };
+  }
+
+  const legacy = normalizeReward(raw.bingoReward) ?? liftedReward;
+  if (legacy) {
+    return {
+      mode: 'card',
+      slots: [{ title: legacy.title, useRandom: false }],
+      assigned: [legacy],
+    };
+  }
+
+  return createDefaultRewards('card');
+}
+
 function normalizeCompletedAt(raw: Record<string, unknown>): number | undefined {
   const completedAt = raw.completedAt;
   if (typeof completedAt === 'number' && Number.isFinite(completedAt)) {
@@ -95,17 +154,18 @@ export function normalizeCell(raw: unknown, index: number): BingoCell {
     return createCell(index);
   }
 
+  const difficulty = normalizeDifficulty(raw.difficulty);
+
   return {
     id: asString(raw.id) ?? crypto.randomUUID(),
-    title: asString(raw.title) ?? asString(raw.text) ?? `Cell ${index + 1}`,
+    title: asString(raw.title) ?? asString(raw.text) ?? '',
     description: asString(raw.description),
     icon: asString(raw.icon),
-    difficulty: normalizeDifficulty(raw.difficulty),
+    difficulty,
     customBackground: normalizeBackground(raw.customBackground),
-    reward: normalizeReward(raw.reward),
     completedAt: normalizeCompletedAt(raw),
     photoId: asString(raw.photoId),
-    photoRequired: raw.photoRequired === true,
+    photoRequired: difficulty === 'GOLDEN' || raw.photoRequired === true,
     position: index,
   };
 }
@@ -174,6 +234,9 @@ export function normalizeCard(raw: unknown): BingoCard | null {
   const now = Date.now();
   const completedAt = asFiniteNumber(raw.completedAt);
   const allCompleted = cells.every((cell) => cell.completedAt !== undefined);
+  const liftedReward = rawCells
+    .map((cell) => (isRecord(cell) ? normalizeReward(cell.reward) : undefined))
+    .find((reward) => reward !== undefined);
 
   return {
     id,
@@ -182,6 +245,7 @@ export function normalizeCard(raw: unknown): BingoCard | null {
     size,
     cells,
     theme: normalizeTheme(raw.theme),
+    rewards: normalizeCardRewards(raw, size, liftedReward),
     isFrozen: raw.isFrozen === true || cells.some((cell) => cell.completedAt !== undefined),
     createdAt: normalizeTimestamp(raw.createdAt, now),
     updatedAt: normalizeTimestamp(raw.updatedAt, now),

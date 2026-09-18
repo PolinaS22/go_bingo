@@ -1,15 +1,15 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { BINGO_STORAGE_KEY, BackupPayload, BingoCard, PersistedBingoState, Reward } from '../types/bingo';
+
 import { isCellCompleted } from '../core/defaults';
 import { normalizePersistedState } from '../core/normalize';
-import { createRandomReward } from '../core/rewards';
+import { BackupPayload, BINGO_STORAGE_KEY, BingoCard, PersistedBingoState } from '../types/bingo';
 
 export interface BingoState extends PersistedBingoState {
   addCard: (card: BingoCard) => void;
   updateCard: (card: BingoCard) => void;
   deleteCard: (cardId: string) => void;
-  completeCell: (cardId: string, cellId: string, photoId?: string, reward?: Reward) => void;
+  completeCell: (cardId: string, cellId: string, photoId?: string) => void;
   resetCard: (cardId: string) => void;
   setCurrentCard: (cardId: string | null) => void;
   importBackup: (payload: BackupPayload) => void;
@@ -40,7 +40,7 @@ export const useBingoStore = create<BingoState>()(
           currentCardId: state.currentCardId === cardId ? null : state.currentCardId,
         })),
 
-      completeCell: (cardId, cellId, photoId, reward) =>
+      completeCell: (cardId, cellId, photoId) =>
         set((state) => ({
           cards: state.cards.map((card) => {
             if (card.id !== cardId) {
@@ -57,7 +57,6 @@ export const useBingoStore = create<BingoState>()(
                 ...cell,
                 completedAt: now,
                 photoId: photoId ?? cell.photoId,
-                reward: cell.reward ?? reward ?? createRandomReward(),
               };
             });
 
@@ -73,7 +72,7 @@ export const useBingoStore = create<BingoState>()(
           }),
         })),
 
-      resetCard: (cardId) =>
+          resetCard: (cardId) =>
         set((state) => ({
           cards: state.cards.map((card) =>
             card.id === cardId
@@ -86,6 +85,10 @@ export const useBingoStore = create<BingoState>()(
                   })),
                   completedAt: undefined,
                   isFrozen: false,
+                  rewards: {
+                    mode: card.rewards.mode,
+                    slots: card.rewards.slots,
+                  },
                   updatedAt: Date.now(),
                 }
               : card

@@ -1,88 +1,66 @@
-import type { CSSProperties } from 'react';
-import { isCellCompleted } from '../../core/defaults';
-import { BingoLine } from '../../core/engine';
-import { BingoCell, GridSize } from '../../types/bingo';
+import clsx from 'clsx';
+
+import { BingoCellVariant } from './BingoCell';
 import { BingoGrid } from './BingoGrid';
+
+import { BingoLine } from '../../core/engine';
+import { getBingoSheetCover } from '../../core/homeCard';
+import { BingoCard } from '../../types/bingo';
+
 import styles from './BingoCardSheet.module.scss';
 
-type CardCssVariables = CSSProperties & {
-  '--card-ink'?: string;
-  '--card-paper'?: string;
-};
-
 interface BingoCardSheetProps {
-  title: string;
-  size: GridSize;
-  cells: BingoCell[];
-  createdAt?: number;
+  card: BingoCard;
   completedLines?: BingoLine[];
   selectedCellId?: string | null;
   onCellClick: (cellId: string) => void;
-  accentColor?: string;
-  paperColor?: string;
+  variant?: BingoCellVariant;
 }
 
+const SIZE_CLASS: Record<BingoCard['size'], string> = {
+  2: styles.size2,
+  3: styles.size3,
+  4: styles.size4,
+  5: styles.size5,
+};
+
 export const BingoCardSheet = ({
-  title,
-  size,
-  cells,
-  createdAt,
+  card,
   completedLines = [],
   selectedCellId = null,
   onCellClick,
-  accentColor,
-  paperColor,
+  variant = 'play',
 }: BingoCardSheetProps) => {
-  const completedCount = cells.filter((cell) => isCellCompleted(cell.completedAt)).length;
-  const cardNumber = new Date(createdAt ?? Date.now()).getFullYear();
-  const cssVariables: CardCssVariables = {};
-  if (accentColor) {
-    cssVariables['--card-ink'] = accentColor;
-  }
-  if (paperColor) {
-    cssVariables['--card-paper'] = paperColor;
-  }
+  const cover = getBingoSheetCover(card);
 
   return (
-    <div className={styles.stage} style={cssVariables}>
-      <div className={`${styles.tape} ${styles.tapeTop}`} aria-hidden />
-      <article className={styles.card}>
-        <header className={styles.header}>
-          <div className={styles.titles}>
-            <p className={styles.bingo}>Bingo</p>
-            <h2 className={styles.subtitle}>{title || 'Untitled Bingo'}</h2>
-          </div>
-          <div className={styles.meta}>
-            <span className={styles.number}>No. {cardNumber}</span>
-            <span className={styles.seal}>Good luck</span>
-          </div>
-        </header>
+    <div className={clsx(styles.stage, SIZE_CLASS[card.size])}>
+      <article className={styles.card} style={{ background: cover.base }}>
+        <div className={styles.blobs} style={{ background: cover.base }} aria-hidden>
+          {cover.blobs.map((blob) => (
+            <span
+              key={`${blob.color}-${blob.x}-${blob.y}`}
+              className={styles.blob}
+              style={{
+                background: blob.color,
+                width: blob.size,
+                height: blob.size,
+                left: blob.x,
+                top: blob.y,
+              }}
+            />
+          ))}
+        </div>
 
         <BingoGrid
-          size={size}
-          cells={cells}
+          size={card.size}
+          cells={card.cells}
           onCellClick={onCellClick}
           completedLines={completedLines}
           selectedCellId={selectedCellId}
+          variant={variant}
         />
-
-        <footer className={styles.footer}>
-          <span>Enjoy every moment</span>
-          <div className={styles.progress}>
-            <span>
-              {String(completedCount).padStart(2, '0')} / {String(cells.length).padStart(2, '0')} completed
-            </span>
-            <div className={styles.bar} aria-hidden>
-              <div
-                className={styles.barFill}
-                style={{ width: `${cells.length === 0 ? 0 : (completedCount / cells.length) * 100}%` }}
-              />
-            </div>
-          </div>
-          <span>Make memories</span>
-        </footer>
       </article>
-      <div className={`${styles.tape} ${styles.tapeBottom}`} aria-hidden />
     </div>
   );
 };

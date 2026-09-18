@@ -19,7 +19,7 @@ function readFileAsDataUrl(file: File): Promise<string> {
   });
 }
 
-function blobToBase64(blob: Blob): Promise<string> {
+export function blobToDataUrl(blob: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onloadend = () => {
@@ -119,7 +119,7 @@ export async function downloadBackup(state: PersistedBingoState): Promise<void> 
   for (const [key, value] of idbEntries) {
     const photoKey = String(key);
     if (photoKey.startsWith(PHOTO_KEY_PREFIX) && value instanceof Blob) {
-      photos[photoKey] = await blobToBase64(value);
+      photos[photoKey] = await blobToDataUrl(value);
     }
   }
 

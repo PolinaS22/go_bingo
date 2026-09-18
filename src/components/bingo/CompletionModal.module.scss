@@ -3,136 +3,603 @@
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(61, 41, 20, 0.4);
+  z-index: 1000;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
-  padding: 16px;
+  padding: 20px 16px;
+  background: rgba(90, 78, 120, 0.28);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
 }
 
 .modal {
-  background: $cream;
-  border: 2px dashed $ink;
-  border-radius: 8px;
-  padding: 28px 24px;
-  max-width: 480px;
-  width: 100%;
   position: relative;
-  box-shadow: 0 16px 36px rgba(61, 41, 20, 0.16);
-  color: $ink-dark;
+  width: min(420px, 100%);
+  max-height: min(92vh, 860px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 28px 24px 22px;
+  border-radius: 36px;
+  background: #faf8fc;
+  box-shadow:
+    0 28px 64px rgba(120, 100, 170, 0.22),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.7);
+  color: $ink-soft;
+}
 
-  h2 {
-    margin: 0 0 16px;
-    font-size: 1.25rem;
-    color: $ink;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-  }
+.wash {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background:
+    radial-gradient(ellipse 70% 45% at 8% 0%, rgba(210, 196, 240, 0.55), transparent 60%),
+    radial-gradient(ellipse 65% 40% at 100% 100%, rgba(196, 214, 245, 0.45), transparent 58%);
+}
+
+.decorPearlTop,
+.decorStar,
+.decorPearlSide,
+.decorShell,
+.decorPearlBottom {
+  position: absolute;
+  pointer-events: none;
+  z-index: 1;
+  object-fit: contain;
+}
+
+.decorPearlTop {
+  top: 14px;
+  left: 18px;
+  width: 22px;
+  opacity: 0.9;
+}
+
+.decorStar {
+  top: 52px;
+  right: 72px;
+  width: 28px;
+  transform: rotate(12deg);
+  filter: drop-shadow(0 4px 8px rgba(160, 140, 200, 0.25));
+}
+
+.decorPearlSide {
+  top: 46%;
+  left: -10px;
+  width: 34px;
+  opacity: 0.85;
+}
+
+.decorShell {
+  bottom: 78px;
+  left: -6px;
+  width: 64px;
+  transform: rotate(-18deg);
+  filter: drop-shadow(0 8px 14px rgba(120, 100, 160, 0.18));
+}
+
+.decorPearlBottom {
+  bottom: 92px;
+  left: 42px;
+  width: 20px;
 }
 
 .closeButton {
   position: absolute;
-  top: 16px;
-  right: 16px;
-  background: none;
+  top: 14px;
+  right: 14px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
   border: none;
-  font-size: 1.5rem;
+  border-radius: 50%;
+  background: transparent;
+  color: $muted-lilac;
   cursor: pointer;
-  color: $muted;
+
+  &:hover,
+  &:focus-visible {
+    background: rgba(139, 124, 246, 0.1);
+    color: $ink-soft;
+  }
 }
 
-.content {
+.heroIcon {
+  position: relative;
+  z-index: 2;
   display: flex;
-  flex-direction: column;
-  gap: 20px;
+  justify-content: center;
+  margin: 4px 0 14px;
 }
 
-.description {
-  color: $muted;
-  line-height: 1.5;
-}
-
-.rewardSection {
-  background: rgba(232, 184, 109, 0.18);
-  border: 1px dashed $gold;
-  border-radius: 8px;
-  padding: 16px;
-
-  h4 {
-    margin: 0 0 8px;
-    color: $ink;
-    text-transform: uppercase;
-    font-size: 0.75rem;
-    letter-spacing: 0.05em;
-  }
-
-  .rewardTitle {
-    font-weight: bold;
-    margin: 0;
-  }
-
-  .rewardDesc {
-    margin: 4px 0 0;
-    font-size: 0.9rem;
-    color: $muted;
-  }
-}
-
-.actionArea,
-.previewArea {
+.heroRing {
   display: flex;
-  flex-direction: column;
-  gap: 16px;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  color: $violet-deep;
+  background: linear-gradient(160deg, #ebe4f8 0%, #e4eaf8 100%);
+  box-shadow: 0 0 0 8px rgba(201, 184, 232, 0.28);
 }
 
-.uploadBox {
-  border: 2px dashed $border;
-  border-radius: 8px;
-  padding: 24px;
+.heroStar {
+  position: absolute;
+  top: -2px;
+  right: calc(50% - 46px);
+  width: 26px;
+  filter: drop-shadow(0 3px 6px rgba(160, 140, 200, 0.3));
+}
+
+.title {
+  position: relative;
+  z-index: 2;
+  margin: 0;
   text-align: center;
-  cursor: pointer;
-
-  &:hover {
-    border-color: $ink;
-  }
-
-  label {
-    cursor: pointer;
-    display: block;
-    width: 100%;
-  }
+  font-family: $font-display;
+  font-size: clamp(1.7rem, 5vw, 2rem);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: $ink-soft;
 }
 
-.completeBtn,
-.closeBtn {
-  background: $ink;
-  color: #fff;
-  border: none;
-  padding: 14px;
-  border-radius: 8px;
+.titleSpark {
+  margin-left: 6px;
+  font-size: 0.72em;
+  color: $lilac-deep;
+}
+
+.subtitle {
+  position: relative;
+  z-index: 2;
+  margin: 6px 0 0;
+  text-align: center;
+  font-family: $font-display;
+  font-size: 1.02rem;
+  font-weight: 500;
+  color: $muted-lilac;
+}
+
+.heart {
+  margin-left: 4px;
+  color: #d4a0c0;
+}
+
+.challenge {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-top: 20px;
+  padding: 14px 14px 14px 12px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: inset 0 0 0 1px rgba(201, 184, 232, 0.28);
+}
+
+.challengeIcon {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  object-fit: contain;
+  border-radius: 12px;
+  background: rgba(246, 243, 251, 0.9);
+}
+
+.challengeIconFallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  background: rgba(235, 228, 247, 0.9);
+  color: $violet;
+  font-size: 1.1rem;
+}
+
+.challengeBody {
+  min-width: 0;
+  flex: 1;
+}
+
+.challengeTop {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.challengeTitle {
+  font-family: $font-display;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: $ink-soft;
+}
+
+.badge {
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-family: $font-ui;
+  font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.04em;
-  text-transform: uppercase;
+  text-transform: capitalize;
+  color: $violet-deep;
+  background: rgba(201, 184, 232, 0.45);
+}
+
+.badgeHard {
+  color: #7a5a9a;
+  background: rgba(201, 184, 232, 0.55);
+}
+
+.badgeGolden {
+  color: #9a7a28;
+  background: rgba(232, 184, 109, 0.35);
+}
+
+.challengeDesc {
+  margin: 4px 0 0;
+  font-family: $font-ui;
+  font-size: 0.82rem;
+  line-height: 1.35;
+  color: $muted-lilac;
+}
+
+.uploadBlock {
+  position: relative;
+  z-index: 2;
+  margin-top: 18px;
+}
+
+.uploadLabel {
+  margin: 0 0 8px;
+  font-family: $font-ui;
+  font-size: 0.88rem;
+  font-weight: 650;
+  color: $ink-soft;
+}
+
+.dropzone {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 132px;
+  padding: 22px 16px;
+  border-radius: 18px;
+  border: 1.5px solid rgba(180, 168, 210, 0.45);
+  background: rgba(255, 255, 255, 0.55);
   cursor: pointer;
+  text-align: center;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+
+  &:hover,
+  &:focus-within {
+    border-color: rgba(139, 124, 246, 0.55);
+    background: rgba(255, 255, 255, 0.82);
+  }
+}
+
+.dropzoneActive {
+  border-color: $violet;
+  background: rgba(235, 228, 247, 0.55);
+  box-shadow: 0 0 0 3px rgba(139, 124, 246, 0.14);
+}
+
+.dropzoneFilled {
+  padding: 0;
+  overflow: hidden;
+  min-height: 160px;
+}
+
+.uploadIcon {
+  color: $muted-lilac;
+}
+
+.dropTitle {
+  font-family: $font-ui;
+  font-size: 0.9rem;
+  font-weight: 550;
+  color: $ink-soft;
+}
+
+.dropHint {
+  font-family: $font-ui;
+  font-size: 0.75rem;
+  color: $muted-lilac;
+}
+
+.preview {
+  display: block;
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+}
+
+.changePhoto {
+  margin-top: 8px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: $violet-deep;
+  font-family: $font-ui;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.error {
+  margin: 8px 0 0;
+  font-family: $font-ui;
+  font-size: 0.78rem;
+  color: #b42318;
+}
+
+.tips {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 14px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: rgba(244, 240, 250, 0.9);
+}
+
+.tipsCopy {
+  flex: 1;
+  min-width: 0;
+
+  p {
+    margin: 0;
+    font-family: $font-ui;
+    font-size: 0.78rem;
+    line-height: 1.4;
+    color: $muted-lilac;
+  }
+}
+
+.tipsTitle {
+  margin-bottom: 6px !important;
+  font-weight: 650 !important;
+  color: $ink-soft !important;
+}
+
+.polaroid {
+  flex-shrink: 0;
+  width: 52px;
+  height: 60px;
+  padding: 5px 5px 12px;
+  border-radius: 4px;
+  background: #fff;
+  box-shadow: 0 6px 14px rgba(120, 100, 160, 0.16);
+  transform: rotate(8deg);
+}
+
+.polaroidShot {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 2px;
+  background:
+    linear-gradient(145deg, #e8dff5 0%, #d8e4f5 45%, #f0e4ec 100%);
+}
+
+.submit {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  margin-top: 18px;
+  padding: 15px 20px;
+  border: none;
+  border-radius: 999px;
+  color: #fff;
+  background: linear-gradient(145deg, #b79cff 0%, #8b7cf6 55%, #7b8cff 100%);
+  box-shadow:
+    0 0 0 5px rgba(155, 130, 230, 0.12),
+    0 12px 24px rgba(123, 100, 210, 0.28);
+  font-family: $font-ui;
+  font-size: 0.98rem;
+  font-weight: 650;
+  cursor: pointer;
+  transition: transform 0.2s ease, filter 0.2s ease;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+    filter: brightness(1.03);
+  }
 
   &:disabled {
     opacity: 0.45;
     cursor: not-allowed;
+    box-shadow: none;
   }
 }
 
-.photo {
+.later {
+  position: relative;
+  z-index: 2;
+  display: block;
+  width: fit-content;
+  margin: 14px auto 2px;
+  padding: 0 0 4px;
+  border: none;
+  background: none;
+  color: #9a8ec8;
+  font-family: $font-ui;
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='6' viewBox='0 0 120 6' fill='none'%3E%3Cpath d='M1 4 C20 1, 40 5, 60 3 S100 1, 119 4' stroke='%23c4b6e8' stroke-width='1.4' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: bottom center;
+  background-size: 100% 6px;
+
+  &:hover {
+    color: $violet-deep;
+  }
+}
+
+.done {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding-top: 12px;
+}
+
+.donePhoto {
   width: 100%;
-  border-radius: 8px;
-  max-height: 320px;
+  margin-top: 16px;
+  border-radius: 18px;
+  max-height: 280px;
   object-fit: cover;
 }
 
-.photoPlaceholder {
-  padding: 2rem;
+.doneEmpty {
+  margin-top: 16px;
+  padding: 2rem 1rem;
   text-align: center;
-  color: $muted;
-  background: $paper;
-  border-radius: 8px;
+  border-radius: 18px;
+  background: rgba(244, 240, 250, 0.9);
+  color: $muted-lilac;
+  font-family: $font-ui;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 480px) {
+  .overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .modal {
+    width: 100%;
+    max-height: 94vh;
+    padding: 22px 18px 18px;
+    border-radius: 28px 28px 0 0;
+  }
+
+  .decorPearlTop {
+    width: 16px;
+    top: 12px;
+    left: 12px;
+  }
+
+  .decorStar {
+    width: 20px;
+    top: 44px;
+    right: 56px;
+  }
+
+  .decorPearlSide {
+    display: none;
+  }
+
+  .decorShell {
+    width: 48px;
+    bottom: 70px;
+    left: -8px;
+    opacity: 0.85;
+  }
+
+  .decorPearlBottom {
+    width: 16px;
+    bottom: 82px;
+    left: 30px;
+  }
+
+  .heroRing {
+    width: 64px;
+    height: 64px;
+  }
+
+  .title {
+    font-size: 1.55rem;
+  }
+
+  .subtitle {
+    font-size: 0.95rem;
+  }
+
+  .challenge {
+    margin-top: 16px;
+    padding: 12px;
+  }
+
+  .challengeIcon,
+  .challengeIconFallback {
+    width: 42px;
+    height: 42px;
+  }
+
+  .dropzone {
+    min-height: 118px;
+    padding: 18px 12px;
+  }
+
+  .dropzoneFilled,
+  .preview {
+    min-height: 140px;
+    height: 140px;
+  }
+
+  .tips {
+    padding: 12px;
+  }
+
+  .polaroid {
+    width: 44px;
+    height: 52px;
+  }
+
+  .submit {
+    margin-top: 14px;
+    padding: 14px 18px;
+  }
+
+  .later {
+    margin-top: 12px;
+  }
+}
+
+@media (max-height: 720px) and (max-width: 480px) {
+  .tips {
+    display: none;
+  }
+
+  .decorShell,
+  .decorPearlBottom {
+    opacity: 0.55;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .submit {
+    transition: none;
+  }
 }

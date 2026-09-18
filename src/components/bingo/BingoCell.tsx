@@ -1,26 +1,49 @@
 import type { CSSProperties } from 'react';
 import clsx from 'clsx';
-import { Star } from 'lucide-react';
-import { isCellIconPath } from '../../core/cellPresets';
-import { isCellCompleted } from '../../core/defaults';
+import { Plus, Star } from 'lucide-react';
+
 import { usePhotoUrl } from '../../hooks/usePhotoUrl';
+
+import { isCellIconPath } from '../../core/cellPresets';
+import { isCellCompleted, isEmptyCell } from '../../core/defaults';
 import { BingoCell as BingoCellType } from '../../types/bingo';
+
 import styles from './BingoCell.module.scss';
+
+export type BingoCellVariant = 'edit' | 'play';
 
 interface BingoCellProps {
   cell: BingoCellType;
   onClick: (id: string) => void;
   selected?: boolean;
+  variant?: BingoCellVariant;
 }
 
-export const BingoCell = ({ cell, onClick, selected = false }: BingoCellProps) => {
-  const isCompleted = isCellCompleted(cell.completedAt);
-  const photoUrl = usePhotoUrl(cell.photoId, isCompleted);
+const WATERCOLOR_SPOTS = [
+  styles.spot0,
+  styles.spot1,
+  styles.spot2,
+  styles.spot3,
+  styles.spot4,
+  styles.spot5,
+] as const;
 
-  // Deterministic watercolor spot selection based on ID
-  const watercolorCount = 6;
-  const spotIndex = cell.id ? Math.abs(cell.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)) % watercolorCount : 0;
-  const spotClass = (styles as any)[`spot${spotIndex}`];
+function spotClassFor(id: string): string {
+  const sum = id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const spot = WATERCOLOR_SPOTS[Math.abs(sum) % WATERCOLOR_SPOTS.length];
+  return spot ?? styles.spot0;
+}
+
+export const BingoCell = ({
+  cell,
+  onClick,
+  selected = false,
+  variant = 'play',
+}: BingoCellProps) => {
+  const isCompleted = isCellCompleted(cell.completedAt);
+  const empty = isEmptyCell(cell);
+  const photoUrl = usePhotoUrl(cell.photoId, isCompleted);
+  const clickable = variant === 'edit' || !empty;
 
   const customStyle: CSSProperties = {};
   if (cell.customBackground) {
@@ -31,37 +54,59 @@ export const BingoCell = ({ cell, onClick, selected = false }: BingoCellProps) =
     }
   }
 
+  const label = empty
+    ? 'Add challenge'
+    : `${cell.title}, ${cell.difficulty}`;
+
   return (
     <button
       type="button"
       className={clsx(styles.cell, {
         [styles.completed]: isCompleted,
         [styles.selected]: selected,
-        [styles.difficultyGolden]: cell.difficulty === 'GOLDEN' && !isCompleted,
-        [styles.hasCustomBackground]: !!cell.customBackground,
+        [styles.empty]: empty,
+        [styles.difficultyGolden]: cell.difficulty === 'GOLDEN' && !isCompleted && !empty,
+        [styles.hasCustomBackground]: Boolean(cell.customBackground),
       })}
       style={customStyle}
-      onClick={() => onClick(cell.id)}
+      onClick={() => {
+        if (clickable) {
+          onClick(cell.id);
+        }
+      }}
+      disabled={!clickable}
       aria-pressed={isCompleted}
-      aria-label={`${cell.title}, ${cell.difficulty}`}
+      aria-label={label}
     >
-      {/* Watercolor Spot Layer */}
-      <div className={clsx(styles.watercolorSpot, spotClass)} />
+      {!empty && <div className={clsx(styles.watercolorSpot, spotClassFor(cell.id))} />}
 
       {photoUrl && isCompleted && (
         <img src={photoUrl} className={styles.photoBackground} alt="" />
       )}
 
-      <div className={styles.content}>
-        {cell.icon && (
-          isCellIconPath(cell.icon) ? (
-            <img src={cell.icon} alt="" className={styles.iconImage} />
+      {empty ? (
+        <div className={styles.emptyContent}>
+          {variant === 'edit' ? (
+            <>
+              <Plus size={22} strokeWidth={2.2} />
+              <span>Add challenge</span>
+            </>
           ) : (
-            <span className={styles.icon}>{cell.icon}</span>
-          )
-        )}
-        <span className={styles.title}>{cell.title}</span>
-      </div>
+            <img src="/assets/main/star.png" alt="" className={styles.emptyStar} />
+          )}
+        </div>
+      ) : (
+        <div className={styles.content}>
+          <span className={styles.title}>{cell.title}</span>
+          {cell.icon ? (
+            isCellIconPath(cell.icon) ? (
+              <img src={cell.icon} alt="" className={styles.iconImage} />
+            ) : (
+              <span className={styles.icon}>{cell.icon}</span>
+            )
+          ) : null}
+        </div>
+      )}
 
       {isCompleted && (
         <span className={styles.doneStar} aria-hidden>

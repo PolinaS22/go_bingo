@@ -3,7 +3,8 @@
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(61, 41, 20, 0.4);
+  background: rgba(255, 192, 203, 0.3);
+  backdrop-filter: blur(10px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -11,73 +12,77 @@
   padding: 20px;
 }
 
-.card,
-.goldenCard {
+.card {
   text-align: center;
   position: relative;
   width: min(360px, 100%);
-  padding: 28px 24px 22px;
-  border-radius: 8px;
-  overflow: hidden;
+  padding: 40px 32px;
+  border-radius: 40px;
+  overflow: visible;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(20px);
+  box-shadow: 0 30px 60px rgba(255, 105, 180, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  color: $deep-mocha;
 }
 
-.card {
-  background: $cream;
-  border: 2px dashed $ink;
-  color: $ink;
-}
-
-.goldenCard {
-  background: #f6e3b3;
-  border: 2px solid $gold;
-  color: #8a5a12;
-}
-
-.crown {
-  color: $gold;
-  margin-bottom: 8px;
+.reward {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 auto 24px;
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: rgba(139, 124, 246, 0.12);
+  color: $violet-deep;
+  font-weight: 650;
+  font-size: 0.92rem;
 }
 
 .text {
-  font-size: clamp(1.6rem, 5vw, 2.2rem);
-  font-weight: 900;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  margin: 0 0 8px;
+  font-size: clamp(1.8rem, 6vw, 2.4rem);
+  font-weight: 800;
+  color: $bubblegum-pink;
+  font-family: 'Quicksand', sans-serif;
+  margin: 0 0 12px;
 }
 
 .subtext {
-  font-size: 0.95rem;
-  font-weight: 600;
-  margin: 0 0 18px;
+  font-size: 1rem;
+  font-weight: 500;
+  margin: 0 0 24px;
+  opacity: 0.8;
 }
 
 .stats {
   list-style: none;
-  margin: 0 0 18px;
-  padding: 0;
+  margin: 0 0 24px;
+  padding: 20px;
+  background: rgba(255, 192, 203, 0.1);
+  border-radius: 20px;
   display: grid;
-  gap: 0.4rem;
-  font-size: 0.85rem;
-  color: inherit;
+  gap: 0.6rem;
+  font-size: 0.9rem;
+  text-align: left;
 }
 
 .action {
-  min-width: 140px;
-  padding: 10px 18px;
+  width: 100%;
+  padding: 16px 24px;
   border: none;
-  border-radius: 8px;
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  border-radius: 100px;
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: 0.02em;
   cursor: pointer;
-  background: $gold;
-  color: $ink-dark;
-}
-
-.card .action {
-  background: $ink;
+  background: linear-gradient(135deg, $bubblegum-pink 0%, $cottage-rose 100%);
   color: #fff;
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 10px 20px rgba(255, 105, 180, 0.2);
+
+  &:hover {
+    transform: scale(1.05);
+  }
 }
 
 .particles {
@@ -89,8 +94,14 @@
 
 .particle {
   position: absolute;
-  width: 8px;
-  height: 8px;
-  background: $gold;
-  border-radius: 50%;
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.particleImage {
+  display: block;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 8px rgba(80, 50, 120, 0.18));
 }

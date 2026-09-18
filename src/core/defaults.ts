@@ -17,14 +17,26 @@ export function isGridSize(value: number): value is GridSize {
   return value === 2 || value === 3 || value === 4 || value === 5;
 }
 
+export const CHALLENGE_TITLE_MAX = 40;
+export const CHALLENGE_DESCRIPTION_MAX = 120;
+export const REWARD_TITLE_MAX = 40;
+
 export function createCell(position: number): BingoCell {
   return {
     id: crypto.randomUUID(),
-    title: `Cell ${position + 1}`,
+    title: '',
     difficulty: 'NORMAL',
     position,
     photoRequired: false,
   };
+}
+
+export function isEmptyCell(cell: BingoCell): boolean {
+  return cell.title.trim().length === 0;
+}
+
+export function countChallenges(cells: readonly BingoCell[]): number {
+  return cells.filter((cell) => !isEmptyCell(cell)).length;
 }
 
 export function createCells(size: GridSize): BingoCell[] {

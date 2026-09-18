@@ -23,6 +23,47 @@ describe('normalizeCard', () => {
     expect(card?.cells[0]?.position).toBe(0);
     expect(card?.isFrozen).toBe(true);
   });
+
+  it('lifts a cell reward onto the card', () => {
+    const card = normalizeCard({
+      id: 'gift',
+      title: 'Treats',
+      size: 2,
+      isFrozen: false,
+      createdAt: 1,
+      updatedAt: 1,
+      cells: [
+        { title: 'Walk', reward: { id: 'r1', title: 'Ice cream', isMystery: true } },
+      ],
+    });
+
+    expect(card?.rewards.mode).toBe('card');
+    expect(card?.rewards.slots[0]?.title).toBe('Ice cream');
+  });
+
+  it('reads the modern rewards config', () => {
+    const card = normalizeCard({
+      id: 'modern',
+      title: 'Modern',
+      size: 2,
+      isFrozen: false,
+      createdAt: 1,
+      updatedAt: 1,
+      cells: [{ title: 'Walk' }],
+      rewards: {
+        mode: 'perBingo',
+        slots: [
+          { title: 'Tea', useRandom: false },
+          { title: '', useRandom: true },
+        ],
+      },
+    });
+
+    expect(card?.rewards.mode).toBe('perBingo');
+    expect(card?.rewards.slots).toHaveLength(2);
+    expect(card?.rewards.slots[0]?.title).toBe('Tea');
+    expect(card?.rewards.slots[1]?.useRandom).toBe(true);
+  });
 });
 
 describe('parseBackup', () => {

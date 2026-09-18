@@ -1,26 +1,74 @@
 import { describe, expect, it } from 'vitest';
-import { makeCell } from '../test/fixtures';
-import { REWARD_TITLES, dealRewardsToCells, fillEmptyRewards } from './rewards';
+import {
+  REWARD_TITLES,
+  assignRewards,
+  createDefaultRewards,
+  createRewardSlot,
+  maxBingoLines,
+  resolveBingoReward,
+  rewardForBingoLine,
+  rewardForFullCard,
+} from './rewards';
 
-describe('rewards catalog', () => {
-  it('fills only empty rewards', () => {
-    const cells = [
-      makeCell({ position: 0, reward: { id: 'r1', title: 'Keep me', isMystery: false } }),
-      makeCell({ position: 1 }),
-    ];
+describe('bingo reward', () => {
+  it('keeps a named reward', () => {
+    const reward = resolveBingoReward({
+      id: 'r1',
+      title: '  Ice cream ',
+      isMystery: false,
+    });
 
-    const filled = fillEmptyRewards(cells);
-
-    expect(filled[0]?.reward?.title).toBe('Keep me');
-    expect(filled[1]?.reward?.title).toBeTruthy();
-    expect(REWARD_TITLES).toContain(filled[1]?.reward?.title);
+    expect(reward.title).toBe('Ice cream');
+    expect(reward.id).toBe('r1');
   });
 
-  it('deals one reward per cell', () => {
-    const cells = [makeCell({ position: 0 }), makeCell({ position: 1 }), makeCell({ position: 2 })];
-    const dealt = dealRewardsToCells(cells);
+  it('fills an empty reward from the catalog', () => {
+    const reward = resolveBingoReward(undefined);
+    expect(REWARD_TITLES).toContain(reward.title);
+  });
 
-    expect(dealt).toHaveLength(3);
-    expect(new Set(dealt.map((cell) => cell.reward?.title)).size).toBe(3);
+  it('counts max bingo lines by grid size', () => {
+    expect(maxBingoLines(2)).toBe(6);
+    expect(maxBingoLines(5)).toBe(12);
+  });
+
+  it('assigns a single card reward', () => {
+    const assigned = assignRewards({
+      mode: 'card',
+      slots: [{ title: 'Picnic', useRandom: false }],
+    });
+    expect(assigned).toHaveLength(1);
+    expect(assigned[0]?.title).toBe('Picnic');
+  });
+
+  it('fills random slots from the catalog', () => {
+    const assigned = assignRewards({
+      mode: 'card',
+      slots: [createRewardSlot()],
+    });
+    expect(REWARD_TITLES).toContain(assigned[0]?.title);
+  });
+
+  it('returns a card reward only in card mode', () => {
+    const card = createDefaultRewards('card');
+    card.slots = [{ title: 'Flowers', useRandom: false }];
+    expect(rewardForFullCard(card)?.title).toBe('Flowers');
+    expect(rewardForBingoLine({ ...card, mode: 'perBingo', slots: card.slots }, 0)).toBeDefined();
+  });
+
+  it('hands out per-bingo rewards in order of assigned list', () => {
+    const config = {
+      mode: 'perBingo' as const,
+      slots: [
+        { title: 'A', useRandom: false },
+        { title: 'B', useRandom: false },
+      ],
+      assigned: [
+        { id: '1', title: 'A', isMystery: false },
+        { id: '2', title: 'B', isMystery: false },
+      ],
+    };
+    expect(rewardForBingoLine(config, 0)?.title).toBe('A');
+    expect(rewardForBingoLine(config, 1)?.title).toBe('B');
   });
 });

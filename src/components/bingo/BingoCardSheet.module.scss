@@ -1,200 +1,103 @@
 @use '../../styles/tokens.scss' as *;
 
 .stage {
-  --card-ink: #{$ink};
-  --card-paper: #{$paper};
   position: relative;
   width: 100%;
-  max-width: 640px;
+  max-width: 720px;
   margin: 0 auto;
-  padding: 1.25rem 0.75rem 1.75rem;
+}
+
+.size2 {
+  max-width: min(360px, 92vw);
+}
+
+.size3 {
+  max-width: min(460px, 94vw);
+}
+
+.size4 {
+  max-width: min(600px, 96vw);
+}
+
+.size5 {
+  max-width: 720px;
 }
 
 .card {
   position: relative;
-  background: #ffefd8;
-  color: var(--card-ink);
-  border: 2px dashed var(--card-ink);
-  padding: 1.1rem 1rem 1.25rem;
-  box-shadow: 0 10px 28px rgba(61, 41, 20, 0.08);
-
-  &::after {
-    content: '';
-    position: absolute;
-    left: -2px;
-    right: -2px;
-    bottom: -10px;
-    height: 12px;
-    background: var(--card-paper);
-    clip-path: polygon(
-      0 0,
-      8% 100%,
-      16% 20%,
-      24% 90%,
-      33% 10%,
-      42% 100%,
-      50% 25%,
-      58% 95%,
-      67% 15%,
-      76% 85%,
-      84% 20%,
-      92% 100%,
-      100% 0
-    );
-  }
+  overflow: hidden;
+  padding: 22px 18px 28px;
+  border-radius: 36px;
+  min-height: 0;
+  box-shadow:
+    0 24px 50px rgba(155, 130, 210, 0.18),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.55);
 }
 
-.tape {
+.blobs {
   position: absolute;
-  left: 50%;
-  width: 92px;
-  height: 22px;
-  background: $tape;
-  z-index: 2;
+  inset: 0;
   pointer-events: none;
-}
-
-.tapeTop {
-  top: 0.35rem;
-  transform: translateX(-50%) rotate(-7deg);
-}
-
-.tapeBottom {
-  bottom: 0.55rem;
-  transform: translateX(-50%) rotate(6deg);
-}
-
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 0.75rem;
-  margin-bottom: 0.85rem;
-}
-
-.titles {
-  min-width: 0;
-}
-
-.bingo {
-  margin: 0;
-  font-family: Georgia, 'Iowan Old Style', Palatino, serif;
-  font-size: clamp(2rem, 7vw, 3.4rem);
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  line-height: 0.9;
-  color: var(--card-ink);
-}
-
-.subtitle {
-  margin: 0.35rem 0 0;
-  font-size: clamp(0.7rem, 2vw, 0.95rem);
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--card-ink);
-  word-break: break-word;
-}
-
-.meta {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.45rem;
-  flex-shrink: 0;
-}
-
-.number {
-  border: 1px solid var(--card-ink);
-  padding: 0.15rem 0.4rem;
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.seal {
-  width: 58px;
-  height: 58px;
-  border: 2px solid var(--card-ink);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  font-size: 0.52rem;
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  line-height: 1.15;
-  transform: rotate(8deg);
-}
-
-.footer {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: center;
-  gap: 0.6rem;
-  margin-top: 0.85rem;
-  font-size: 0.58rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--card-ink);
-}
-
-.progress {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.3rem;
-  text-align: center;
-}
-
-.bar {
-  width: min(160px, 100%);
-  height: 5px;
-  background: rgba(196, 92, 88, 0.18);
   overflow: hidden;
 }
 
-.barFill {
-  height: 100%;
-  background: var(--card-ink);
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(28px);
+  opacity: 0.55;
+}
+
+.starTop,
+.starRight,
+.pearlLeft,
+.pearlRight {
+  position: absolute;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.starTop {
+  top: 10px;
+  right: 18px;
+  width: 36px;
+  height: 36px;
+}
+
+.starRight {
+  top: 42%;
+  right: -6px;
+  width: 28px;
+  height: 28px;
+}
+
+.pearlLeft {
+  left: -10px;
+  bottom: 18%;
+  width: 52px;
+  height: 52px;
+}
+
+.pearlRight {
+  right: 12px;
+  bottom: 8px;
+  width: 34px;
+  height: 34px;
 }
 
 @media (max-width: 768px) {
-  .stage {
-    max-width: none;
-    padding: 0.85rem 0 1.4rem;
-  }
-
   .card {
-    padding: 0.85rem 0.7rem 1rem;
+    padding: 14px 12px 18px;
+    border-radius: 28px;
   }
 
-  .seal {
-    width: 46px;
-    height: 46px;
-    font-size: 0.45rem;
+  .starTop {
+    width: 26px;
+    height: 26px;
   }
 
-  .footer {
-    grid-template-columns: 1fr;
-    text-align: center;
-
-    span:first-child,
-    span:last-child {
-      display: none;
-    }
-  }
-
-  .progress {
-    width: 100%;
-  }
-
-  .bar {
-    width: 100%;
+  .pearlLeft {
+    width: 40px;
+    height: 40px;
   }
 }

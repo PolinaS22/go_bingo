@@ -1,11 +1,4 @@
-$bg: #fdf8f3;
-$text: #3d2914;
-$muted: #6b5344;
-$primary: #c0504d;
-$gold: #ebb05d;
-$border: #e4ddd4;
-$field-border: #d8d0c8;
-$radius: 10px;
+@use '../../styles/tokens.scss' as *;
 
 .overlay {
   position: fixed;
@@ -21,38 +14,50 @@ $radius: 10px;
 .panel {
   pointer-events: auto;
   width: min(400px, 100%);
-  height: 100%;
-  background: $bg;
+  height: auto;
+  max-height: calc(100vh - 48px);
+  margin: 24px 20px 24px auto;
+  background: rgba(255, 255, 255, 0.86);
+  backdrop-filter: blur(18px);
   display: flex;
   flex-direction: column;
   position: absolute;
   right: 0;
   top: 0;
-  bottom: 0;
-  box-shadow: -8px 0 24px rgba(61, 41, 20, 0.08);
+  border-radius: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 20px 50px rgba(140, 120, 180, 0.16);
 }
 
 .header {
-  padding: 1.25rem 1.5rem 0.75rem;
+  padding: 1.15rem 1.35rem 0.6rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 8px;
 
   h3 {
     margin: 0;
-    font-size: 1.125rem;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: $text;
+    font-family: $font-ui;
+    font-size: 1.05rem;
+    font-weight: 650;
+    color: $ink-soft;
   }
+}
+
+.titleDesktop {
+  display: inline;
+}
+
+.titleMobile {
+  display: none;
 }
 
 .closeButton {
   background: none;
   border: none;
   cursor: pointer;
-  color: $text;
+  color: $muted-lilac;
   padding: 0.25rem;
   line-height: 1;
   display: flex;
@@ -60,49 +65,65 @@ $radius: 10px;
   justify-content: center;
 
   &:hover {
-    color: $primary;
+    color: $violet;
   }
 }
 
+.doneHeader {
+  display: none;
+}
+
 .content {
-  padding: 0.5rem 1.5rem 1rem;
+  padding: 0.35rem 1.35rem 1rem;
   overflow-y: auto;
   flex: 1;
   overscroll-behavior: contain;
 }
 
 .section {
-  margin-bottom: 1.25rem;
+  margin-bottom: 1.15rem;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 
 .label {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: $text;
+  font-size: 0.82rem;
+  font-weight: 650;
+  color: $ink-soft;
+}
+
+.labelRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.counter {
+  font-size: 0.72rem;
+  color: $muted-lilac;
 }
 
 input[type='text'],
 textarea {
   width: 100%;
-  padding: 0.7rem 0.85rem;
-  border: 1px solid $field-border;
-  border-radius: $radius;
-  font-size: 0.875rem;
-  color: $text;
-  background: #fff;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid rgba(201, 184, 232, 0.55);
+  border-radius: 14px;
+  font-size: 0.9rem;
+  color: $ink-soft;
+  background: rgba(255, 255, 255, 0.92);
   font-family: inherit;
 
   &::placeholder {
-    color: #b5a89c;
+    color: #b5a8c4;
   }
 
   &:focus {
     outline: none;
-    border-color: $primary;
-    box-shadow: 0 0 0 3px rgba(192, 80, 77, 0.12);
+    border-color: $violet;
+    box-shadow: 0 0 0 3px rgba(139, 124, 246, 0.16);
   }
 
   &:disabled {
@@ -123,10 +144,10 @@ textarea {
 }
 
 .iconPreview {
-  width: 64px;
-  height: 64px;
-  border-radius: $radius;
-  background: #f6efe6;
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: rgba(246, 243, 251, 0.9);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -134,33 +155,31 @@ textarea {
   overflow: hidden;
 
   img {
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     object-fit: contain;
   }
 }
 
 .iconPlaceholder {
-  color: #c4b6a8;
+  color: #c4b6d4;
   font-weight: 700;
 }
 
 .changeIcon {
   flex: 1;
   padding: 0.7rem 0.85rem;
-  border: 1px solid $field-border;
-  border-radius: $radius;
+  border: 1px solid rgba(201, 184, 232, 0.55);
+  border-radius: 14px;
   background: #fff;
-  color: $muted;
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  color: $muted-lilac;
+  font-size: 0.82rem;
+  font-weight: 650;
   cursor: pointer;
 
   &:hover:not(:disabled) {
-    border-color: $primary;
-    color: $text;
+    border-color: $violet;
+    color: $ink-soft;
   }
 
   &:disabled {
@@ -177,8 +196,8 @@ textarea {
 
 .iconOption {
   aspect-ratio: 1;
-  border: 1px solid $border;
-  border-radius: 8px;
+  border: 1px solid rgba(201, 184, 232, 0.4);
+  border-radius: 12px;
   background: #fff;
   cursor: pointer;
   padding: 0.35rem;
@@ -194,13 +213,13 @@ textarea {
 }
 
 .iconSelected {
-  border-color: $primary;
-  box-shadow: 0 0 0 2px rgba(192, 80, 77, 0.2);
+  border-color: $violet;
+  box-shadow: 0 0 0 2px rgba(139, 124, 246, 0.2);
 }
 
 .difficultyGroup {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.45rem;
 }
 
 .difficultyButton {
@@ -209,15 +228,13 @@ textarea {
   align-items: center;
   justify-content: center;
   gap: 0.3rem;
-  padding: 0.65rem 0.4rem;
-  border: 1px solid $field-border;
-  border-radius: $radius;
+  padding: 0.7rem 0.35rem;
+  border: 1px solid rgba(201, 184, 232, 0.5);
+  border-radius: 14px;
   background: #fff;
-  color: $muted;
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+  color: $muted-lilac;
+  font-size: 0.78rem;
+  font-weight: 650;
   cursor: pointer;
 
   &:disabled {
@@ -227,15 +244,67 @@ textarea {
 }
 
 .difficultyActive:not(.difficultyGolden) {
-  border-color: $primary;
-  color: $text;
-  background: #fff5f4;
+  border-color: $violet;
+  color: $violet-deep;
+  background: rgba(139, 124, 246, 0.1);
 }
 
 .difficultyGolden.difficultyActive {
-  background: $gold;
-  border-color: $gold;
-  color: $text;
+  background: linear-gradient(145deg, #f6d889 0%, #e8b86d 100%);
+  border-color: #e8b86d;
+  color: #6a4b16;
+}
+
+.toggleRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.hint {
+  margin: 4px 0 0;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: $muted-lilac;
+}
+
+.switch {
+  width: 48px;
+  height: 28px;
+  border-radius: 999px;
+  border: none;
+  background: #e6e0ef;
+  position: relative;
+  cursor: pointer;
+  flex-shrink: 0;
+  margin-top: 2px;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 2px 6px rgba(80, 60, 120, 0.18);
+    transition: transform 0.2s ease;
+  }
+
+  &[aria-checked='true'] {
+    background: $violet;
+  }
+
+  &[aria-checked='true']::after {
+    transform: translateX(20px);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
 }
 
 .swatchRow {
@@ -248,9 +317,9 @@ textarea {
 .swatch,
 .addSwatch,
 .imageSwatch {
-  width: 44px;
-  height: 44px;
-  border-radius: 8px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
   border: 2px solid transparent;
   padding: 0;
   cursor: pointer;
@@ -258,7 +327,7 @@ textarea {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: $primary;
+  color: $violet;
   flex-shrink: 0;
 
   &:disabled {
@@ -268,17 +337,17 @@ textarea {
 }
 
 .swatchSelected {
-  border-color: $primary;
+  border-color: $violet;
 }
 
 .addSwatch {
   border: 1.5px dashed #c8bfb4;
   background: transparent;
-  color: $muted;
+  color: $muted-lilac;
 
   &:hover:not(:disabled) {
-    border-color: $primary;
-    color: $primary;
+    border-color: $violet;
+    color: $violet;
   }
 }
 
@@ -293,6 +362,7 @@ textarea {
 .imageSwatch {
   overflow: hidden;
   background: #eee;
+  border-radius: 12px;
 
   img {
     width: 100%;
@@ -308,122 +378,26 @@ textarea {
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: $primary;
+  background: $violet;
   color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.photoHint {
-  flex-basis: 100%;
-  font-size: 0.75rem;
-  color: $muted;
-  line-height: 1.4;
-}
-
-.rewardRow {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-
-  input {
-    flex: 1;
-  }
-}
-
-.giftButton {
-  width: 44px;
-  height: 44px;
-  border: none;
-  border-radius: 8px;
-  background: $primary;
-  color: #fff;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-
-  &:hover:not(:disabled) {
-    filter: brightness(0.95);
-  }
-
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-}
-
-.giftActive {
-  box-shadow: 0 0 0 3px rgba(192, 80, 77, 0.25);
-}
-
-.checkbox {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  cursor: pointer;
-  color: $text;
-  font-size: 0.875rem;
-  position: relative;
-
-  input {
-    position: absolute;
-    opacity: 0;
-    width: 1px;
-    height: 1px;
-  }
-
-  &:has(input:disabled) {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-}
-
-.box {
-  width: 22px;
-  height: 22px;
-  border-radius: 4px;
-  border: 2px solid $primary;
-  background: #fff;
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.checkbox input:checked + .box {
-  background: $primary;
-}
-
-.checkbox input:focus-visible + .box {
-  box-shadow: 0 0 0 3px rgba(192, 80, 77, 0.2);
-}
-
-.crown {
-  margin-left: auto;
-  color: $gold;
-  flex-shrink: 0;
 }
 
 .footer {
   display: flex;
   gap: 0.75rem;
-  padding: 1rem 1.5rem calc(1.25rem + env(safe-area-inset-bottom));
-  background: $bg;
+  padding: 0.85rem 1.35rem calc(1.1rem + env(safe-area-inset-bottom));
 }
 
 .deleteButton,
 .saveButton {
   flex: 1;
-  padding: 0.85rem 0.75rem;
-  border-radius: $radius;
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+  padding: 0.9rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.88rem;
+  font-weight: 650;
   cursor: pointer;
 
   &:disabled {
@@ -433,18 +407,19 @@ textarea {
 }
 
 .deleteButton {
-  background: #f8efe8;
-  border: 1px solid #e8b4b0;
-  color: $primary;
+  background: #f8f3fb;
+  border: 1px solid rgba(201, 184, 232, 0.55);
+  color: $muted-lilac;
 }
 
 .saveButton {
-  background: $primary;
-  border: 1px solid $primary;
+  background: linear-gradient(145deg, #b79cff 0%, #7b8cff 100%);
+  border: none;
   color: #fff;
+  box-shadow: 0 10px 22px rgba(123, 100, 210, 0.28);
 
   &:hover:not(:disabled) {
-    filter: brightness(0.95);
+    filter: brightness(1.03);
   }
 }
 
@@ -458,18 +433,46 @@ textarea {
     position: absolute;
     inset: 0;
     border: none;
-    background: rgba(61, 41, 20, 0.35);
+    background: rgba(61, 50, 90, 0.28);
     cursor: pointer;
   }
 
   .panel {
     width: 100%;
     height: auto;
-    max-height: min(92dvh, 100%);
+    max-height: min(88dvh, 100%);
+    margin: 0;
     top: auto;
     bottom: 0;
-    border-radius: 20px 20px 0 0;
+    border-radius: 24px 24px 0 0;
     box-shadow: 0 -8px 32px rgba(61, 41, 20, 0.16);
+  }
+
+  .titleDesktop {
+    display: none;
+  }
+
+  .titleMobile {
+    display: inline;
+  }
+
+  .closeButton,
+  .desktopOnly,
+  .footer .saveButton {
+    display: none;
+  }
+
+  .doneHeader {
+    display: inline-flex;
+    margin-left: auto;
+    padding: 0.4rem 0.95rem;
+    border: none;
+    border-radius: 999px;
+    background: linear-gradient(145deg, #b79cff 0%, #7b8cff 100%);
+    color: #fff;
+    font-size: 0.88rem;
+    font-weight: 650;
+    cursor: pointer;
   }
 
   .iconGrid {
@@ -486,16 +489,8 @@ textarea {
   }
 
   .difficultyButton {
-    font-size: 0.62rem;
+    font-size: 0.7rem;
     padding: 0.6rem 0.2rem;
-  }
-
-  .swatch,
-  .addSwatch,
-  .imageSwatch,
-  .giftButton {
-    width: 40px;
-    height: 40px;
   }
 
   .iconGrid {

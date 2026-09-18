@@ -1,12 +1,19 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useBingoStore } from '../store/useBingoStore';
-import { downloadBackup, getPhoto, uploadBackup } from '../services/storage';
+import { getPhoto } from '../services/storage';
+import {
+  downloadBingoCardImage,
+  downloadMemoryPhotosZip,
+  downloadPhotoFile,
+} from '../core/exportMemories';
 import styles from './MemoriesView.module.scss';
-import { Camera, Download, Upload, ArrowLeft } from 'lucide-react';
+import { Archive, Camera, ImageDown, ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface MemoryPhoto {
   id: string;
+  cardId: string;
+  cardTitle: string;
   url: string;
   title: string;
   completedAt?: number;
@@ -17,8 +24,14 @@ interface MemoriesViewProps {
 }
 
 export const MemoriesView = ({ onBack }: MemoriesViewProps) => {
-  const { cards, currentCardId, importBackup } = useBingoStore();
+  const { cards } = useBingoStore();
   const [photos, setPhotos] = useState<MemoryPhoto[]>([]);
+  const [busy, setBusy] = useState(false);
+
+  const completedCards = useMemo(
+    () => cards.filter((card) => card.completedAt !== undefined),
+    [cards]
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -48,6 +61,8 @@ export const MemoriesView = ({ onBack }: MemoriesViewProps) => {
 
           loaded.push({
             id: cell.photoId,
+            cardId: card.id,
+            cardTitle: card.title,
             url,
             title: cell.title,
             completedAt: cell.completedAt,
@@ -68,15 +83,13 @@ export const MemoriesView = ({ onBack }: MemoriesViewProps) => {
     };
   }, [cards]);
 
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) {
-      return;
+  const handleZipDownload = async () => {
+    setBusy(true);
+    try {
+      await downloadMemoryPhotosZip(cards);
+    } finally {
+      setBusy(false);
     }
-
-    const backup = await uploadBackup(file);
-    importBackup(backup);
-    event.target.value = '';
   };
 
   return (
@@ -87,21 +100,45 @@ export const MemoriesView = ({ onBack }: MemoriesViewProps) => {
         </button>
         <h1>Memories</h1>
         <div className={styles.actions}>
-          <label className={styles.actionButton}>
-            <Upload size={20} />
-            <input type="file" accept=".json" onChange={(event) => void handleFileUpload(event)} hidden />
-          </label>
           <button
             type="button"
-            onClick={() => {
-              void downloadBackup({ cards, currentCardId });
-            }}
             className={styles.actionButton}
+            aria-label="Download photos as zip"
+            title="Download photos as zip"
+            disabled={busy || photos.length === 0}
+            onClick={() => {
+              void handleZipDownload();
+            }}
           >
-            <Download size={20} />
+            <Archive size={20} />
           </button>
         </div>
       </header>
+
+      {completedCards.length > 0 ? (
+        <section className={styles.exports}>
+          <h2>Completed bingo</h2>
+          <p>Save the finished card as an image — cells and photos as you see them.</p>
+          <ul className={styles.exportList}>
+            {completedCards.map((card) => (
+              <li key={card.id}>
+                <span>{card.title}</span>
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => {
+                    setBusy(true);
+                    void downloadBingoCardImage(card).finally(() => setBusy(false));
+                  }}
+                >
+                  <ImageDown size={16} />
+                  Save image
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
       {photos.length === 0 ? (
         <div className={styles.empty}>
@@ -112,7 +149,7 @@ export const MemoriesView = ({ onBack }: MemoriesViewProps) => {
         <div className={styles.masonry}>
           {photos.map((photo, index) => (
             <motion.div
-              key={photo.id}
+              key={`${photo.cardId}-${photo.id}`}
               className={styles.item}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -126,6 +163,15 @@ export const MemoriesView = ({ onBack }: MemoriesViewProps) => {
                     {new Date(photo.completedAt).toLocaleDateString()}
                   </time>
                 )}
+                <button
+                  type="button"
+                  className={styles.downloadOne}
+                  onClick={() => {
+                    void downloadPhotoFile(photo.id, photo.title);
+                  }}
+                >
+                  Download
+                </button>
               </div>
             </motion.div>
           ))}

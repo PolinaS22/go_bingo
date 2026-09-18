@@ -1,4 +1,4 @@
-import { BingoCell, Reward } from '../types/bingo';
+import { CardRewards, GridSize, Reward, RewardMode, RewardSlot } from '../types/bingo';
 
 export const REWARD_TITLES = [
   'Treat yourself to dessert',
@@ -33,6 +33,11 @@ export const REWARD_TITLES = [
   'Pick a song and dance',
 ] as const;
 
+/** Rows + columns + both diagonals. */
+export function maxBingoLines(size: GridSize): number {
+  return size * 2 + 2;
+}
+
 function randomInt(max: number): number {
   const bytes = new Uint32Array(1);
   crypto.getRandomValues(bytes);
@@ -40,22 +45,13 @@ function randomInt(max: number): number {
   return value % max;
 }
 
-function shuffled<T>(items: readonly T[]): T[] {
-  const copy = [...items];
-  for (let index = copy.length - 1; index > 0; index -= 1) {
-    const swapWith = randomInt(index + 1);
-    const current = copy[index];
-    const other = copy[swapWith];
-    if (current === undefined || other === undefined) {
-      continue;
-    }
-    copy[index] = other;
-    copy[swapWith] = current;
-  }
-  return copy;
+function pickCatalogTitle(exclude: ReadonlySet<string> = new Set()): string {
+  const available = REWARD_TITLES.filter((title) => !exclude.has(title));
+  const pool = available.length > 0 ? available : [...REWARD_TITLES];
+  return pool[randomInt(pool.length)] ?? REWARD_TITLES[0];
 }
 
-export function createReward(title: string, isMystery = true): Reward {
+export function createReward(title: string, isMystery = false): Reward {
   return {
     id: crypto.randomUUID(),
     title,
@@ -63,36 +59,109 @@ export function createReward(title: string, isMystery = true): Reward {
   };
 }
 
-export function createRandomReward(exclude: ReadonlySet<string> = new Set()): Reward {
-  const pool = REWARD_TITLES.filter((title) => !exclude.has(title));
-  const source = pool.length > 0 ? pool : REWARD_TITLES;
-  const title = source[randomInt(source.length)] ?? REWARD_TITLES[0];
-  return createReward(title, true);
+export function createRandomReward(): Reward {
+  return createReward(pickCatalogTitle(), false);
 }
 
-export function fillEmptyRewards(cells: BingoCell[]): BingoCell[] {
-  const used = new Set(
-    cells
-      .map((cell) => cell.reward?.title.trim())
-      .filter((title): title is string => title !== undefined && title.length > 0)
-  );
+export function createRewardSlot(title = '', useRandom = true): RewardSlot {
+  return { title, useRandom };
+}
 
-  return cells.map((cell) => {
-    const existingTitle = cell.reward?.title.trim();
-    if (existingTitle) {
-      return cell;
+export function createDefaultRewards(mode: RewardMode = 'card'): CardRewards {
+  return {
+    mode,
+    slots: [createRewardSlot()],
+  };
+}
+
+export function createEmptySlots(count: number): RewardSlot[] {
+  return Array.from({ length: Math.max(1, count) }, () => createRewardSlot());
+}
+
+function shuffleInPlace<T>(items: T[]): T[] {
+  for (let index = items.length - 1; index > 0; index -= 1) {
+    const swap = randomInt(index + 1);
+    const current = items[index];
+    const other = items[swap];
+    if (current === undefined || other === undefined) {
+      continue;
     }
-
-    const reward = createRandomReward(used);
-    used.add(reward.title);
-    return { ...cell, reward };
-  });
+    items[index] = other;
+    items[swap] = current;
+  }
+  return items;
 }
 
-export function dealRewardsToCells(cells: BingoCell[]): BingoCell[] {
-  const titles = shuffled(REWARD_TITLES);
-  return cells.map((cell, index) => {
-    const title = titles[index % titles.length] ?? REWARD_TITLES[0];
-    return { ...cell, reward: createReward(title, true) };
-  });
+export function resolveRewardSlot(
+  slot: RewardSlot | undefined,
+  usedTitles: ReadonlySet<string> = new Set()
+): Reward {
+  const trimmed = slot?.title.trim() ?? '';
+  if (slot && !slot.useRandom && trimmed) {
+    return createReward(trimmed, false);
+  }
+  return createReward(pickCatalogTitle(usedTitles), slot?.useRandom !== false && !trimmed);
+}
+
+/** Resolve slots into a shuffled assigned list for play. */
+export function assignRewards(config: CardRewards): Reward[] {
+  const slots =
+    config.mode === 'card'
+      ? [config.slots[0] ?? createRewardSlot()]
+      : config.slots.length > 0
+        ? [...config.slots]
+        : [createRewardSlot()];
+
+  const resolved: Reward[] = [];
+  const used = new Set<string>();
+
+  for (const slot of slots) {
+    const reward = resolveRewardSlot(slot, used);
+    used.add(reward.title);
+    resolved.push(reward);
+  }
+
+  if (config.mode === 'perBingo' && resolved.length > 1) {
+    shuffleInPlace(resolved);
+  }
+
+  return resolved;
+}
+
+export function ensureAssignedRewards(config: CardRewards): CardRewards {
+  if (config.assigned && config.assigned.length > 0) {
+    return config;
+  }
+  return { ...config, assigned: assignRewards(config) };
+}
+
+/** Reward for the n-th completed bingo line (0-based), perBingo mode only. */
+export function rewardForBingoLine(config: CardRewards, lineIndex: number): Reward | undefined {
+  if (config.mode !== 'perBingo') {
+    return undefined;
+  }
+  const assigned = config.assigned ?? assignRewards(config);
+  if (lineIndex < assigned.length) {
+    return assigned[lineIndex];
+  }
+  // More bingos than written slots → catalog fill
+  return createRandomReward();
+}
+
+/** Reward shown when the whole card is completed, card mode only. */
+export function rewardForFullCard(config: CardRewards): Reward | undefined {
+  if (config.mode !== 'card') {
+    return undefined;
+  }
+  const assigned = config.assigned ?? assignRewards(config);
+  return assigned[0] ?? createRandomReward();
+}
+
+/** @deprecated Prefer resolveRewardSlot / assignRewards. Kept for tests migrating. */
+export function resolveBingoReward(reward: Reward | undefined): Reward {
+  const title = reward?.title.trim();
+  if (reward && title) {
+    return { ...reward, title };
+  }
+  return createRandomReward();
 }

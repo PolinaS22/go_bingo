@@ -3,23 +3,114 @@
 .editorContainer {
   display: flex;
   min-height: calc(100vh - 80px);
-  background-color: $cream;
+  background: transparent;
 }
 
 .mainContent {
   flex: 1;
-  padding: 1.5rem 1.25rem 2.5rem;
+  padding: 1.25rem 1.1rem 2.5rem;
   overflow-y: auto;
-  max-width: 760px;
+  max-width: 1080px;
   margin: 0 auto;
   width: 100%;
   transition: margin-right 0.2s ease;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.backButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin-top: 2px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.7);
+  color: $ink-soft;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    background: #fff;
+  }
+}
+
+.heading {
+  min-width: 0;
 
   h1 {
-    margin: 0 0 1.25rem;
-    color: $ink-dark;
-    text-align: center;
-    font-size: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    color: $ink-soft;
+    font-family: $font-display;
+    font-size: 1.85rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    text-align: left;
+  }
+
+  p {
+    margin: 4px 0 0;
+    color: $muted-lilac;
+    font-family: $font-ui;
+    font-size: 0.92rem;
+  }
+}
+
+.titleSparkle {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  background: url('/assets/main/star_pearl.png') center / contain no-repeat;
+}
+
+.continueRow {
+  display: flex;
+  justify-content: stretch;
+  margin-top: 8px;
+}
+
+.continueButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 14px 22px;
+  border: none;
+  border-radius: 999px;
+  color: #fff;
+  background: linear-gradient(145deg, #b79cff 0%, #7b8cff 100%);
+  box-shadow:
+    0 0 0 6px rgba(155, 130, 230, 0.14),
+    0 10px 22px rgba(123, 100, 210, 0.32);
+  font-family: $font-ui;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover:not(:disabled),
+  &:focus-visible:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow:
+      0 0 0 8px rgba(155, 130, 230, 0.16),
+      0 14px 26px rgba(123, 100, 210, 0.38);
+  }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    box-shadow: none;
   }
 }
 
@@ -27,41 +118,82 @@
   margin-right: 400px;
 }
 
-.topControls {
+.mobilePageTitle {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.85rem;
-  margin-bottom: 0.5rem;
 }
 
-.formGroup {
-  flex: 1 1 180px;
-  display: flex;
-  flex-direction: column;
-
-  label {
-    margin-bottom: 0.4rem;
-    font-weight: 600;
-    color: $ink-dark;
-    font-size: 0.8rem;
-  }
+.inlineTitle {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  color: $ink-soft;
 
   input {
-    padding: 0.65rem 0.8rem;
-    border: 1px solid $border;
-    border-radius: $radius;
-    background: #fff;
-    color: $ink-dark;
-    font-size: 0.875rem;
+    min-width: 0;
+    flex: 1;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: $ink-soft;
+    font-family: $font-display;
+    font-size: 2.1rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
 
     &:focus {
       outline: none;
-      border-color: $ink;
-      box-shadow: 0 0 0 3px rgba(196, 92, 88, 0.12);
     }
+  }
+}
 
-    &:disabled {
-      opacity: 0.6;
+.editHint {
+  margin: 0 0 10px;
+  text-align: center;
+  color: $muted-lilac;
+  font-size: 0.82rem;
+}
+
+.hintDesktop {
+  display: none;
+}
+
+.hintMobile {
+  display: inline;
+}
+
+.bingoMeta {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1.25rem;
+}
+
+.rewardField {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+
+  label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 650;
+    color: $ink-soft;
+    font-size: 0.82rem;
+  }
+
+  input {
+    padding: 0.75rem 0.9rem;
+    border: 1px solid rgba(201, 184, 232, 0.55);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.9);
+    color: $ink-soft;
+    font-size: 0.9rem;
+
+    &:focus {
+      outline: none;
+      border-color: $violet;
+      box-shadow: 0 0 0 3px rgba(139, 124, 246, 0.16);
     }
   }
 }
@@ -75,9 +207,9 @@
 
   legend {
     margin-bottom: 0.4rem;
-    font-weight: 600;
-    color: $ink-dark;
-    font-size: 0.8rem;
+    font-weight: 650;
+    color: $ink-soft;
+    font-size: 0.82rem;
     padding: 0;
   }
 }
@@ -89,18 +221,17 @@
   button {
     flex: 1;
     padding: 0.65rem 0.4rem;
-    border: 1px solid $border;
-    border-radius: $radius;
-    background: #fff;
-    color: $muted;
+    border: 1px solid rgba(201, 184, 232, 0.5);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.9);
+    color: $muted-lilac;
     font-size: 0.8rem;
-    font-weight: 700;
-    letter-spacing: 0.04em;
+    font-weight: 650;
     cursor: pointer;
 
     &:hover:not(:disabled) {
-      border-color: $ink;
-      color: $ink-dark;
+      border-color: $violet;
+      color: $ink-soft;
     }
 
     &:disabled {
@@ -111,76 +242,44 @@
 }
 
 .sizeActive {
-  background: #fff5f4 !important;
-  border-color: $ink !important;
-  color: $ink-dark !important;
-}
-
-.themePanel {
-  display: flex;
-  justify-content: center;
-  gap: 0.5rem;
-  margin: 0.25rem 0 0.75rem;
-
-  button {
-    width: 36px;
-    height: 36px;
-    border-radius: 8px;
-    border: 2px solid transparent;
-    cursor: pointer;
-  }
-}
-
-.themeActive {
-  border-color: $ink !important;
+  background: rgba(139, 124, 246, 0.12) !important;
+  border-color: $violet !important;
+  color: $violet-deep !important;
 }
 
 .actions {
   display: flex;
   flex-wrap: wrap;
   gap: 0.65rem;
-  margin-top: 0.5rem;
+  margin-top: 1rem;
 }
 
-.ghostButton,
 .saveButton {
-  flex: 1 1 140px;
+  width: 100%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.4rem;
-  padding: 0.85rem 0.75rem;
-  border-radius: $radius;
-  font-size: 0.75rem;
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  cursor: pointer;
-}
-
-.ghostButton {
-  background: $paper;
-  border: 1px solid $border;
-  color: $ink-dark;
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-}
-
-.saveButton {
-  background: $ink;
-  border: 1px solid $ink;
+  padding: 14px 22px;
+  border: none;
+  border-radius: 999px;
   color: #fff;
+  background: linear-gradient(145deg, #b79cff 0%, #7b8cff 100%);
+  box-shadow:
+    0 0 0 6px rgba(155, 130, 230, 0.14),
+    0 10px 22px rgba(123, 100, 210, 0.32);
+  font-family: $font-ui;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
 
   &:hover:not(:disabled) {
-    filter: brightness(0.95);
+    transform: translateY(-1px);
   }
 
   &:disabled {
-    opacity: 0.5;
+    opacity: 0.45;
     cursor: not-allowed;
+    box-shadow: none;
   }
 }
 
@@ -199,27 +298,54 @@
   }
 }
 
-@media (max-width: 768px) {
+@media (min-width: $nav-break) {
   .mainContent {
-    padding: 1rem 0.85rem 2rem;
-
-    h1 {
-      font-size: 1.05rem;
-      margin-bottom: 0.85rem;
-    }
+    padding: 36px 40px 48px;
   }
 
-  .topControls {
-    flex-direction: column;
-    gap: 0.7rem;
+  .header {
+    margin-bottom: 8px;
   }
 
+  .heading h1 {
+    font-size: 2.4rem;
+  }
+
+  .mobilePageTitle {
+    display: none;
+  }
+
+  .inlineTitle {
+    display: flex;
+  }
+
+  .hintDesktop {
+    display: inline;
+  }
+
+  .hintMobile {
+    display: none;
+  }
+
+  .continueRow {
+    justify-content: flex-end;
+    margin-top: 28px;
+  }
+
+  .continueButton {
+    width: auto;
+    min-width: 180px;
+  }
+
+  .saveButton {
+    width: auto;
+    min-width: 180px;
+    margin-left: auto;
+  }
+}
+
+@media (max-width: 768px) {
   .actions {
     flex-direction: column;
-  }
-
-  .ghostButton,
-  .saveButton {
-    flex-basis: auto;
   }
 }

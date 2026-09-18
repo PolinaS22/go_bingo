@@ -1,16 +1,21 @@
 import { useEffect, useRef, useState } from 'react';
 import clsx from 'clsx';
-import { Check, Crown, Gift, Plus, Shuffle, Star, X } from 'lucide-react';
+import { Check, Plus, Star, X } from 'lucide-react';
+
 import {
   CELL_ICON_PATHS,
-  PASTEL_COLORS,
-  PRESET_BACKGROUNDS,
   isPresetPastel,
   isSameBackground,
+  PASTEL_COLORS,
+  PRESET_BACKGROUNDS,
 } from '../../core/cellPresets';
-import { createCell } from '../../core/defaults';
-import { createRandomReward } from '../../core/rewards';
-import { Background, BingoCell, Difficulty, Reward } from '../../types/bingo';
+import {
+  CHALLENGE_DESCRIPTION_MAX,
+  CHALLENGE_TITLE_MAX,
+  createCell,
+} from '../../core/defaults';
+import { Background, BingoCell, Difficulty } from '../../types/bingo';
+
 import styles from './CellSettingsPanel.module.scss';
 
 interface CellSettingsPanelProps {
@@ -20,15 +25,11 @@ interface CellSettingsPanelProps {
   disabled?: boolean;
 }
 
-const DIFFICULTIES: readonly Difficulty[] = ['NORMAL', 'HARD', 'GOLDEN'];
-
-function emptyReward(): Reward {
-  return {
-    id: crypto.randomUUID(),
-    title: '',
-    isMystery: false,
-  };
-}
+const DIFFICULTIES: readonly { id: Difficulty; label: string }[] = [
+  { id: 'NORMAL', label: 'Normal' },
+  { id: 'HARD', label: 'Hard' },
+  { id: 'GOLDEN', label: 'Golden' },
+];
 
 export const CellSettingsPanel = ({
   cell,
@@ -40,6 +41,8 @@ export const CellSettingsPanel = ({
   const [iconPickerOpen, setIconPickerOpen] = useState(false);
   const [customColors, setCustomColors] = useState<string[]>([]);
   const colorInputRef = useRef<HTMLInputElement>(null);
+  const draftRef = useRef(draft);
+  draftRef.current = draft;
 
   useEffect(() => {
     setDraft(cell);
@@ -50,6 +53,28 @@ export const CellSettingsPanel = ({
       setCustomColors((prev) => (prev.includes(color) ? prev : [...prev, color]));
     }
   }, [cell]);
+
+  // Native `change` fires when the picker closes; React `onChange` tracks every drag move.
+  useEffect(() => {
+    const input = colorInputRef.current;
+    if (!input) {
+      return;
+    }
+
+    const commit = () => {
+      const value = input.value;
+      if (!isPresetPastel(value)) {
+        setCustomColors((prev) => (prev.includes(value) ? prev : [...prev, value]));
+      }
+      setDraft({
+        ...draftRef.current,
+        customBackground: { type: 'color', value },
+      });
+    };
+
+    input.addEventListener('change', commit);
+    return () => input.removeEventListener('change', commit);
+  }, []);
 
   const patchDraft = <K extends keyof BingoCell>(field: K, value: BingoCell[K]) => {
     setDraft((prev) => ({ ...prev, [field]: value }));
@@ -63,13 +88,6 @@ export const CellSettingsPanel = ({
     }));
   };
 
-  const patchReward = <K extends keyof Reward>(field: K, value: Reward[K]) => {
-    setDraft((prev) => {
-      const currentReward = prev.reward ?? emptyReward();
-      return { ...prev, reward: { ...currentReward, [field]: value } };
-    });
-  };
-
   const selectBackground = (background: Background) => {
     patchDraft(
       'customBackground',
@@ -77,26 +95,12 @@ export const CellSettingsPanel = ({
     );
   };
 
-  const handleCustomColor = (value: string) => {
-    if (!isPresetPastel(value)) {
-      setCustomColors((prev) => (prev.includes(value) ? prev : [...prev, value]));
-    }
-    patchDraft('customBackground', { type: 'color', value });
-  };
-
   const handleSave = () => {
-    const rewardTitle = draft.reward?.title.trim() ?? '';
-    const nextReward =
-      draft.reward && rewardTitle.length > 0
-        ? { ...draft.reward, title: rewardTitle }
-        : createRandomReward();
-
     onChange({
       ...draft,
       title: draft.title.trim(),
       description: draft.description?.trim() || undefined,
       photoRequired: draft.difficulty === 'GOLDEN' ? true : draft.photoRequired,
-      reward: nextReward,
     });
     onClose();
   };
@@ -113,6 +117,10 @@ export const CellSettingsPanel = ({
     draft.customBackground?.type === 'color' ? draft.customBackground.value : undefined;
   const selectedImage =
     draft.customBackground?.type === 'image' ? draft.customBackground.value : undefined;
+  const isGolden = draft.difficulty === 'GOLDEN';
+  const photoOn = isGolden || draft.photoRequired;
+  const titleLength = draft.title.length;
+  const descriptionLength = (draft.description ?? '').length;
 
   return (
     <div className={styles.overlay}>
@@ -124,32 +132,24 @@ export const CellSettingsPanel = ({
       />
       <aside className={styles.panel} role="dialog" aria-labelledby="cell-settings-title">
         <div className={styles.header}>
-          <h3 id="cell-settings-title">Edit Cell</h3>
+          <h3 id="cell-settings-title">
+            <span className={styles.titleDesktop}>Cell details</span>
+            <span className={styles.titleMobile}>Edit cell</span>
+          </h3>
+          <button
+            type="button"
+            className={styles.doneHeader}
+            onClick={handleSave}
+            disabled={disabled}
+          >
+            Done
+          </button>
           <button type="button" onClick={onClose} className={styles.closeButton} aria-label="Close">
             <X size={20} />
           </button>
         </div>
 
         <div className={styles.content}>
-          <div className={styles.section}>
-            <span className={styles.label}>Challenge</span>
-            <input
-              id="cell-title"
-              type="text"
-              value={draft.title}
-              onChange={(event) => patchDraft('title', event.target.value)}
-              placeholder="Visit a shrine"
-              disabled={disabled}
-            />
-            <textarea
-              id="cell-description"
-              value={draft.description ?? ''}
-              onChange={(event) => patchDraft('description', event.target.value)}
-              placeholder="Find and visit a beautiful shrine. Take a moment to enjoy the atmosphere."
-              disabled={disabled}
-            />
-          </div>
-
           <div className={styles.section}>
             <span className={styles.label}>Icon</span>
             <div className={styles.iconRow}>
@@ -166,7 +166,7 @@ export const CellSettingsPanel = ({
                 onClick={() => setIconPickerOpen((open) => !open)}
                 disabled={disabled}
               >
-                Change Icon
+                Change
               </button>
             </div>
             {iconPickerOpen && (
@@ -192,29 +192,90 @@ export const CellSettingsPanel = ({
           </div>
 
           <div className={styles.section}>
+            <div className={styles.labelRow}>
+              <label className={styles.label} htmlFor="cell-title">
+                Challenge title
+              </label>
+              <span className={styles.counter}>
+                {titleLength}/{CHALLENGE_TITLE_MAX}
+              </span>
+            </div>
+            <input
+              id="cell-title"
+              type="text"
+              value={draft.title}
+              maxLength={CHALLENGE_TITLE_MAX}
+              onChange={(event) => patchDraft('title', event.target.value)}
+              placeholder="Visit a shrine"
+              disabled={disabled}
+            />
+          </div>
+
+          <div className={styles.section}>
+            <div className={styles.labelRow}>
+              <label className={styles.label} htmlFor="cell-description">
+                Description (optional)
+              </label>
+              <span className={styles.counter}>
+                {descriptionLength}/{CHALLENGE_DESCRIPTION_MAX}
+              </span>
+            </div>
+            <textarea
+              id="cell-description"
+              value={draft.description ?? ''}
+              maxLength={CHALLENGE_DESCRIPTION_MAX}
+              onChange={(event) => patchDraft('description', event.target.value)}
+              placeholder="Find and visit a beautiful shrine."
+              disabled={disabled}
+            />
+          </div>
+
+          <div className={styles.section}>
             <span className={styles.label}>Difficulty</span>
             <div className={styles.difficultyGroup} role="group" aria-label="Difficulty">
               {DIFFICULTIES.map((level) => (
                 <button
                   type="button"
-                  key={level}
+                  key={level.id}
                   className={clsx(
                     styles.difficultyButton,
-                    draft.difficulty === level && styles.difficultyActive,
-                    level === 'GOLDEN' && styles.difficultyGolden
+                    draft.difficulty === level.id && styles.difficultyActive,
+                    level.id === 'GOLDEN' && styles.difficultyGolden
                   )}
-                  aria-pressed={draft.difficulty === level}
-                  onClick={() => setDifficulty(level)}
+                  aria-pressed={draft.difficulty === level.id}
+                  onClick={() => setDifficulty(level.id)}
                   disabled={disabled}
                 >
-                  {level === 'GOLDEN' && <Star size={14} fill="currentColor" />}
-                  {level}
+                  {level.id === 'GOLDEN' && <Star size={14} fill="currentColor" />}
+                  {level.label}
                 </button>
               ))}
             </div>
           </div>
 
           <div className={styles.section}>
+            <div className={styles.toggleRow}>
+              <div>
+                <span className={styles.label}>Photo required</span>
+                <p className={styles.hint}>
+                  {isGolden
+                    ? 'Required for Golden challenges.'
+                    : 'Optional. Recommended for Hard and required for Golden.'}
+                </p>
+              </div>
+              <button
+                type="button"
+                className={styles.switch}
+                role="switch"
+                aria-checked={photoOn}
+                aria-label="Photo required"
+                disabled={disabled || isGolden}
+                onClick={() => patchDraft('photoRequired', !draft.photoRequired)}
+              />
+            </div>
+          </div>
+
+          <div className={clsx(styles.section, styles.desktopOnly)}>
             <span className={styles.label}>Background</span>
             <div className={styles.swatchRow} role="group" aria-label="Background colors">
               {PASTEL_COLORS.map((color) => (
@@ -258,8 +319,7 @@ export const CellSettingsPanel = ({
                 ref={colorInputRef}
                 type="color"
                 className={styles.hiddenColor}
-                value={selectedColor ?? '#C0504D'}
-                onChange={(event) => handleCustomColor(event.target.value)}
+                defaultValue={selectedColor ?? '#C9B8E8'}
                 tabIndex={-1}
                 aria-hidden
               />
@@ -286,84 +346,7 @@ export const CellSettingsPanel = ({
                   )}
                 </button>
               ))}
-              <div className={styles.photoHint}>
-                A completion photo becomes the cell background after the challenge is done.
-              </div>
             </div>
-          </div>
-
-          <div className={styles.section}>
-            <span className={styles.label}>Reward (hidden until completed)</span>
-            <div className={styles.rewardRow}>
-              <input
-                id="reward-title"
-                type="text"
-                value={draft.reward?.title ?? ''}
-                onChange={(event) => patchReward('title', event.target.value)}
-                placeholder="Empty = random surprise reward"
-                disabled={disabled}
-              />
-              <button
-                type="button"
-                className={styles.giftButton}
-                aria-label="Pick a random reward"
-                onClick={() => {
-                  const reward = createRandomReward();
-                  setDraft((prev) => ({ ...prev, reward }));
-                }}
-                disabled={disabled}
-              >
-                <Shuffle size={18} />
-              </button>
-              <button
-                type="button"
-                className={clsx(
-                  styles.giftButton,
-                  draft.reward?.isMystery && styles.giftActive
-                )}
-                aria-pressed={draft.reward?.isMystery ?? false}
-                aria-label="Mystery reward"
-                onClick={() => patchReward('isMystery', !(draft.reward?.isMystery ?? false))}
-                disabled={disabled}
-              >
-                <Gift size={18} />
-              </button>
-            </div>
-          </div>
-
-          <div className={styles.section}>
-            <span className={styles.label}>Photo</span>
-            <label className={styles.checkbox}>
-              <input
-                type="checkbox"
-                checked={draft.photoRequired}
-                onChange={(event) => patchDraft('photoRequired', event.target.checked)}
-                disabled={disabled}
-              />
-              <span className={styles.box}>
-                {draft.photoRequired && <Check size={14} />}
-              </span>
-              <span>Photo required to complete</span>
-            </label>
-          </div>
-
-          <div className={styles.section}>
-            <span className={styles.label}>Golden Challenge</span>
-            <label className={styles.checkbox}>
-              <input
-                type="checkbox"
-                checked={draft.difficulty === 'GOLDEN'}
-                onChange={(event) =>
-                  setDifficulty(event.target.checked ? 'GOLDEN' : 'NORMAL')
-                }
-                disabled={disabled}
-              />
-              <span className={styles.box}>
-                {draft.difficulty === 'GOLDEN' && <Check size={14} />}
-              </span>
-              <span>This is a Golden Challenge</span>
-              <Crown size={18} className={styles.crown} />
-            </label>
           </div>
         </div>
 
@@ -374,7 +357,7 @@ export const CellSettingsPanel = ({
             onClick={handleDelete}
             disabled={disabled}
           >
-            Delete Cell
+            Clear cell
           </button>
           <button
             type="button"
@@ -382,7 +365,7 @@ export const CellSettingsPanel = ({
             onClick={handleSave}
             disabled={disabled}
           >
-            Save Changes
+            Done
           </button>
         </div>
       </aside>
